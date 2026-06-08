@@ -2,7 +2,7 @@
 window.VIEWS = window.VIEWS || {};
 (function () {
   const { DEX, TYPES } = window.VSEDEX;
-  const { go, TypePill, SpriteSlot, PageHead, Empty } = window.VUI;
+  const { go, TypePill, AbilityPill, SpriteSlot, PageHead, Empty } = window.VUI;
   const ALL_TYPES = Object.keys(TYPES);
   const bst = d => Object.values(d.stats).reduce((a, b) => a + b, 0);
 
@@ -30,8 +30,9 @@ window.VIEWS = window.VIEWS || {};
           <SpriteSlot dex={d.dex} name={d.name} size={132} accent={accent} />
         </div>
         <div style={{ fontFamily: "'Cinzel', Georgia, 'Times New Roman', serif", fontWeight: 700, fontSize: 22, color: '#fff', lineHeight: 1 }}>{d.name}</div>
-        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11.5, color: '#b39a72', margin: '4px 0 10px', minHeight: 14, lineHeight: 1.35 }}>
-          {[...d.abilities, ...(d.hidden ? [d.hidden] : [])].join(' · ') || '—'}
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', margin: '4px 0 10px', minHeight: 14 }}>
+          {d.abilities.map(a => <AbilityPill key={a} name={a} />)}
+          {d.hidden && <AbilityPill name={d.hidden} hidden />}
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>{d.types.map(t => <TypePill key={t} t={t} sm onClick={(e) => { e.stopPropagation(); open(); }} />)}</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid #1c1609' }}>

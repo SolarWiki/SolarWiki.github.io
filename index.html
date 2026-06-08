@@ -90,8 +90,8 @@
     if (view === 'pokemon') content = <window.VIEWS.Detail param={param} />;
     else if (view === 'bosses') content = <window.VIEWS.Bosses />;
     else if (view === 'types') content = <window.VIEWS.Types />;
-    else if (view === 'abilities') content = <window.VIEWS.Abilities />;
-    else if (view === 'moves') content = <window.VIEWS.Moves />;
+    else if (view === 'abilities') content = <window.VIEWS.Abilities param={param} />;
+    else if (view === 'moves') content = <window.VIEWS.Moves param={param} />;
     else if (view === 'items') content = <window.VIEWS.Items />;
     else if (view === 'tms') content = <window.VIEWS.TMs />;
     else content = <window.VIEWS.Pokedex query={query} />;

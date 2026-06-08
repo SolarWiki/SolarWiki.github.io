@@ -3,7 +3,7 @@
 window.VIEWS = window.VIEWS || {};
 (function () {
   const { TYPES, byDex } = window.VSEDEX;
-  const { go, SpriteSlot, PageHead, Empty } = window.VUI;
+  const { go, SpriteSlot, TypePill, MovePill, AbilityPill, PageHead, Empty } = window.VUI;
   const BOSSES = window.VSE_BOSSES;
 
   const CLASS_COLOR = { 'Rival': '#ff9e58', 'Gym Leader': '#6fa8ff', 'Team Sol': '#c45fff' };
@@ -32,17 +32,17 @@ window.VIEWS = window.VIEWS || {};
               <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 15, color: '#fff', textTransform: 'capitalize' }}>{entry ? entry.name : m.sp.toLowerCase()}</span>
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347' }}>Lv {m.lv}</span>
             </div>
-            {entry && <div style={{ display: 'flex', gap: 4, marginTop: 3 }}>{entry.types.map(t => <span key={t} style={{ width: 7, height: 7, borderRadius: '50%', background: TYPES[t].glow }} title={TYPES[t].name} />)}</div>}
-            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11.5, color: '#b3a892', marginTop: 5, lineHeight: 1.5 }}>
-              {abilName && <span>{abilName}</span>}
-              {m.item && <span> · <span style={{ color: '#cbb88f' }}>{m.item.replace(/([A-Z])/g, ' $1').trim()}</span></span>}
-              {m.nat && <span> · {m.nat.charAt(0) + m.nat.slice(1).toLowerCase()}</span>}
+            {entry && <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 5 }}>{entry.types.map(t => <TypePill key={t} t={t} sm onClick={() => {}} />)}</div>}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 7 }}>
+              {abilName && <AbilityPill name={abilName} hidden={m.abil === 'H' || (entry && abilName === entry.hidden)} />}
+              {m.item && <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11.5, color: '#cbb88f' }}>{m.item.replace(/([A-Z])/g, ' $1').trim()}</span>}
+              {m.nat && <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11.5, color: '#9a8d6f' }}>{m.nat.charAt(0) + m.nat.slice(1).toLowerCase()}</span>}
             </div>
           </div>
         </div>
         {m.moves && m.moves.length > 0 && (
           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 9 }}>
-            {m.moves.map((mv, i) => <span key={i} style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, color: '#d8cbb0', background: '#1a1407', border: '1px solid #2c2413', borderRadius: 6, padding: '2px 7px', textTransform: 'capitalize' }}>{mv.toLowerCase().replace(/_/g, ' ')}</span>)}
+            {m.moves.map((mv, i) => <MovePill key={i} name={mv} />)}
           </div>
         )}
         {evs.length > 0 && (

@@ -3,7 +3,7 @@
 window.VIEWS = window.VIEWS || {};
 (function () {
   const { DEX, TYPES, byDex } = window.VSEDEX;
-  const { go, TypePill, SpriteSlot, StatBars, PageHead, Empty } = window.VUI;
+  const { go, TypePill, AbilityPill, SpriteSlot, StatBars, PageHead, Empty } = window.VUI;
   const bstOf = s => Object.values(s).reduce((a, b) => a + b, 0);
 
   // ---- Stat + abilities block --------------------------------------------
@@ -42,8 +42,8 @@ window.VIEWS = window.VIEWS || {};
         <div style={{ marginTop: 16 }}>
           <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 600, color: '#8a7d63', marginBottom: 8, letterSpacing: 1, textTransform: 'uppercase' }}>Abilities</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {entry.abilities.map(a => <span key={a} style={{ padding: '5px 12px', borderRadius: 7, background: '#1a1407', border: '1px solid #3a2c12', color: '#ffe0b0', fontSize: 13 }}>{a}</span>)}
-            {entry.hidden && <span style={{ padding: '5px 12px', borderRadius: 7, background: '#2a1c08', border: '1px solid #ffb34755', color: '#ffb347', fontSize: 13 }}>{entry.hidden} <span style={{ fontSize: 9, opacity: 0.7 }}>HA</span></span>}
+            {entry.abilities.map(a => <AbilityPill key={a} name={a} />)}
+            {entry.hidden && <AbilityPill name={entry.hidden} hidden />}
           </div>
         </div>
       </div>

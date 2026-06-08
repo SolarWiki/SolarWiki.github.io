@@ -25,8 +25,9 @@ window.VIEWS = window.VIEWS || {};
     );
   }
 
-  window.VIEWS.Moves = function Moves() {
-    const [q, setQ] = React.useState('');
+  window.VIEWS.Moves = function Moves({ param }) {
+    const [q, setQ] = React.useState(param ? decodeURIComponent(param) : '');
+    React.useEffect(() => { if (param) setQ(decodeURIComponent(param)); }, [param]);
     const [typeF, setTypeF] = React.useState(null);
     const [clsF, setClsF] = React.useState(null);
     const [sort, setSort] = React.useState('name');

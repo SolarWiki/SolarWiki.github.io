@@ -128,5 +128,34 @@
     return <div style={{ padding: 60, textAlign: 'center', color: '#8a7d63', fontFamily: "'Space Mono', monospace", fontSize: 14 }}>{label}</div>;
   }
 
-  window.VUI = { go, TypePill, SpriteSlot, StatBars, Panel, PageHead, Empty, TYPES };
+  // ---- Clickable move / ability pills (navigate to their info page) ------
+  function MovePill({ name }) {
+    const [hov, setHov] = React.useState(false);
+    const label = String(name).toLowerCase().replace(/_/g, ' ');
+    return (
+      <button onClick={(e) => { e.stopPropagation(); go('#/moves/' + encodeURIComponent(name)); }}
+        onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+        style={{
+          cursor: 'pointer', fontFamily: "'Outfit', sans-serif", fontSize: 11, textTransform: 'capitalize',
+          color: hov ? '#fff' : '#d8cbb0', background: hov ? '#2a2110' : '#1a1407',
+          border: `1px solid ${hov ? '#5a4318' : '#2c2413'}`, borderRadius: 6, padding: '2px 8px',
+        }}>{label}</button>
+    );
+  }
+  function AbilityPill({ name, hidden }) {
+    const [hov, setHov] = React.useState(false);
+    if (!name) return null;
+    return (
+      <button onClick={(e) => { e.stopPropagation(); go('#/abilities/' + encodeURIComponent(name)); }}
+        onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+        style={{
+          cursor: 'pointer', fontFamily: "'Outfit', sans-serif", fontSize: 13, padding: '5px 12px', borderRadius: 7,
+          background: hidden ? (hov ? '#3a2710' : '#2a1c08') : (hov ? '#241d10' : '#1a1407'),
+          border: `1px solid ${hidden ? '#ffb34766' : (hov ? '#5a4318' : '#3a2c12')}`,
+          color: hidden ? '#ffb347' : '#ffe0b0',
+        }}>{name}{hidden ? <span style={{ fontSize: 9, opacity: 0.7 }}> HA</span> : null}</button>
+    );
+  }
+
+  window.VUI = { go, TypePill, MovePill, AbilityPill, SpriteSlot, StatBars, Panel, PageHead, Empty, TYPES };
 })();

@@ -39,9 +39,10 @@ window.VIEWS = window.VIEWS || {};
     );
   }
 
-  window.VIEWS.Abilities = function Abilities() {
-    const [q, setQ] = React.useState('');
+  window.VIEWS.Abilities = function Abilities({ param }) {
+    const [q, setQ] = React.useState(param ? decodeURIComponent(param) : '');
     const [only, setOnly] = React.useState(false);
+    React.useEffect(() => { if (param) setQ(decodeURIComponent(param)); }, [param]);
     const query = q.trim().toLowerCase();
     let list = ABIL.filter(a => {
       if (only && !a.changed) return false;
