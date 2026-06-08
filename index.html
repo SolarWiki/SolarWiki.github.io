@@ -64,6 +64,8 @@
 <script type="text/babel" src="wiki/view-types.jsx"></script>
 <script type="text/babel" src="wiki/view-abilities.jsx"></script>
 <script type="text/babel" src="wiki/view-moves.jsx"></script>
+<script type="text/babel" src="wiki/view-items.jsx"></script>
+<script type="text/babel" src="wiki/view-tms.jsx"></script>
 
 <script type="text/babel">
   function parseHash(h) {
@@ -88,9 +90,11 @@
     else if (view === 'types') content = <window.VIEWS.Types />;
     else if (view === 'abilities') content = <window.VIEWS.Abilities />;
     else if (view === 'moves') content = <window.VIEWS.Moves />;
+    else if (view === 'items') content = <window.VIEWS.Items />;
+    else if (view === 'tms') content = <window.VIEWS.TMs />;
     else content = <window.VIEWS.Pokedex query={query} />;
 
-    const NAV = [['pokedex', 'Pokédex'], ['types', 'Type Calc'], ['abilities', 'Abilities'], ['moves', 'Moves']];
+    const NAV = [['pokedex', 'Pokédex'], ['types', 'Type Calc'], ['abilities', 'Abilities'], ['moves', 'Moves'], ['items', 'Items'], ['tms', 'TMs']];
 
     return (
       <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 24px 64px' }}>
