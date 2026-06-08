@@ -66,6 +66,7 @@
 <script type="text/babel" src="wiki/view-moves.jsx"></script>
 <script type="text/babel" src="wiki/view-items.jsx"></script>
 <script type="text/babel" src="wiki/view-tms.jsx"></script>
+<script type="text/babel" src="wiki/view-bosses.jsx"></script>
 
 <script type="text/babel">
   function parseHash(h) {
@@ -87,6 +88,7 @@
 
     let content;
     if (view === 'pokemon') content = <window.VIEWS.Detail param={param} />;
+    else if (view === 'bosses') content = <window.VIEWS.Bosses />;
     else if (view === 'types') content = <window.VIEWS.Types />;
     else if (view === 'abilities') content = <window.VIEWS.Abilities />;
     else if (view === 'moves') content = <window.VIEWS.Moves />;
@@ -94,7 +96,7 @@
     else if (view === 'tms') content = <window.VIEWS.TMs />;
     else content = <window.VIEWS.Pokedex query={query} />;
 
-    const NAV = [['pokedex', 'Pokédex'], ['types', 'Type Calc'], ['abilities', 'Abilities'], ['moves', 'Moves'], ['items', 'Items'], ['tms', 'TMs']];
+    const NAV = [['pokedex', 'Pokédex'], ['bosses', 'Bosses'], ['types', 'Type Calc'], ['abilities', 'Abilities'], ['moves', 'Moves'], ['items', 'Items'], ['tms', 'TMs']];
 
     return (
       <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 24px 64px' }}>
