@@ -3,7 +3,7 @@
 window.VIEWS = window.VIEWS || {};
 (function () {
   const { TYPES, byDex } = window.VSEDEX;
-  const { go, SpriteSlot, TypePill, MovePill, AbilityPill, PageHead, Empty } = window.VUI;
+  const { go, SpriteSlot, TypePill, MovePill, AbilityPill, ItemPill, PageHead, Empty } = window.VUI;
   const BOSSES = window.VSE_BOSSES;
 
   const CLASS_COLOR = { 'Rival': '#ff9e58', 'Gym Leader': '#6fa8ff', 'Team Sol': '#c45fff' };
@@ -29,13 +29,14 @@ window.VIEWS = window.VIEWS || {};
           </button>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 6 }}>
-              <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 15, color: '#fff', textTransform: 'capitalize' }}>{entry ? entry.name : m.sp.toLowerCase()}</span>
+              <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 15, color: '#fff', textTransform: 'capitalize' }}>{m.nick || (entry ? entry.name : m.sp.toLowerCase())}</span>
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347' }}>Lv {m.lv}</span>
             </div>
+            {m.nick && <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, color: '#7a6c4a', textTransform: 'capitalize', marginTop: 1 }}>{entry ? entry.name : m.sp.toLowerCase()}</div>}
             {entry && <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 5 }}>{entry.types.map(t => <TypePill key={t} t={t} sm onClick={() => {}} />)}</div>}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 7 }}>
               {abilName && <AbilityPill name={abilName} hidden={m.abil === 'H' || (entry && abilName === entry.hidden)} />}
-              {m.item && <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11.5, color: '#cbb88f' }}>{m.item.replace(/([A-Z])/g, ' $1').trim()}</span>}
+              {m.item && <ItemPill name={m.item} />}
               {m.nat && <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11.5, color: '#9a8d6f' }}>{m.nat.charAt(0) + m.nat.slice(1).toLowerCase()}</span>}
             </div>
           </div>

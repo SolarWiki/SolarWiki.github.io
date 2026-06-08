@@ -157,5 +157,19 @@
     );
   }
 
-  window.VUI = { go, TypePill, MovePill, AbilityPill, SpriteSlot, StatBars, Panel, PageHead, Empty, TYPES };
+  function ItemPill({ name }) {
+    const [hov, setHov] = React.useState(false);
+    if (!name) return null;
+    return (
+      <button onClick={(e) => { e.stopPropagation(); go('#/items/' + encodeURIComponent(name)); }}
+        onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+        style={{
+          cursor: 'pointer', fontFamily: "'Outfit', sans-serif", fontSize: 11.5, padding: '3px 9px', borderRadius: 7,
+          color: hov ? '#fff' : '#cbb88f', background: hov ? '#2a2110' : '#15110a',
+          border: `1px solid ${hov ? '#5a4318' : '#3a2c12'}`,
+        }}>@ {name}</button>
+    );
+  }
+
+  window.VUI = { go, TypePill, MovePill, AbilityPill, ItemPill, SpriteSlot, StatBars, Panel, PageHead, Empty, TYPES };
 })();
