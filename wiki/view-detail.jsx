@@ -96,6 +96,37 @@ window.VIEWS = window.VIEWS || {};
     );
   }
 
+  // ---- Evolution family --------------------------------------------------
+  function EvoFamily({ d }) {
+    const baseKey = window.VSE_FAMILY_OF && window.VSE_FAMILY_OF[d.dex];
+    const fam = baseKey && window.VSE_FAMILIES && window.VSE_FAMILIES[baseKey];
+    if (!fam || fam.length < 2) return null; // no evolution
+    return (
+      <div style={{ marginTop: 26 }}>
+        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 600, color: '#8a7d63', marginBottom: 12, letterSpacing: 1, textTransform: 'uppercase' }}>Evolution Family</div>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
+          {fam.map((s, i) => (
+            <React.Fragment key={s.dex}>
+              {i > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 6px', minWidth: 70 }}>
+                  <span style={{ color: '#ffb347', fontSize: 18, lineHeight: 1 }}>→</span>
+                  <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, color: '#9a8d6f', textAlign: 'center', marginTop: 2 }}>{(s.method || '').replace(/^at /, '')}</span>
+                </div>
+              )}
+              <button onClick={() => s.dex !== d.dex && go('#/pokemon/' + s.dex)} style={{
+                cursor: s.dex === d.dex ? 'default' : 'pointer', background: s.dex === d.dex ? '#1a1407' : 'transparent',
+                border: `1px solid ${s.dex === d.dex ? '#ffb34766' : '#241d10'}`, borderRadius: 12, padding: 8, textAlign: 'center',
+              }}>
+                <SpriteSlot dex={s.dex} name={s.name} size={72} accent={s.dex === d.dex ? '#ffb347' : '#5a5240'} />
+                <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 12, fontWeight: s.dex === d.dex ? 700 : 500, color: s.dex === d.dex ? '#fff' : '#b3a892', marginTop: 4 }}>{s.name}</div>
+              </button>
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   // ---- Full detail page --------------------------------------------------
   window.VIEWS.Detail = function Detail({ param }) {
     const d = byDex[param];
@@ -147,6 +178,7 @@ window.VIEWS = window.VIEWS || {};
               </div>
             )}
             <StatBlock entry={cur} vanilla={vi === 0 ? (window.VSE_VANILLA && window.VSE_VANILLA[d.dex]) : null} />
+            {vi === 0 && <EvoFamily d={d} />}
             <ShinyShowcase d={d} accent={accent} vi={vi} />
           </div>
         </div>

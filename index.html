@@ -60,6 +60,8 @@
 <script type="text/babel" src="wiki/ui.jsx"></script>
 <script type="text/babel" src="wiki/view-pokedex.jsx"></script>
 <script type="text/babel" src="wiki/view-detail.jsx"></script>
+<script type="text/babel" src="wiki/view-types.jsx"></script>
+<script type="text/babel" src="wiki/view-abilities.jsx"></script>
 
 <script type="text/babel">
   function parseHash(h) {
@@ -81,7 +83,11 @@
 
     let content;
     if (view === 'pokemon') content = <window.VIEWS.Detail param={param} />;
+    else if (view === 'types') content = <window.VIEWS.Types />;
+    else if (view === 'abilities') content = <window.VIEWS.Abilities />;
     else content = <window.VIEWS.Pokedex query={query} />;
+
+    const NAV = [['pokedex', 'Pokédex'], ['types', 'Type Calc'], ['abilities', 'Abilities']];
 
     return (
       <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 24px 64px' }}>
@@ -102,6 +108,20 @@
             </div>
           )}
         </header>
+
+        {/* nav */}
+        <nav style={{ display: 'flex', gap: 8, marginBottom: 28, flexWrap: 'wrap' }}>
+          {NAV.map(([id, label]) => {
+            const active = (id === 'pokedex' && (view === 'pokedex' || view === 'pokemon')) || view === id;
+            return (
+              <button key={id} onClick={() => { window.location.hash = '#/' + id; }} style={{
+                cursor: 'pointer', padding: '8px 16px', borderRadius: 9, fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: active ? 600 : 500,
+                background: active ? '#2a1c08' : '#0f0b04', color: active ? '#ffb347' : '#9a8d6f',
+                border: `1px solid ${active ? '#ffb34788' : '#2a2110'}`,
+              }}>{label}</button>
+            );
+          })}
+        </nav>
 
         {content}
 
