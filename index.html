@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pokémon Solar Eclipse — Wiki</title>
+<meta name="theme-color" content="#0a0805" />
+<link href="fonts.css" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #0a0805;
+    color: #ece3d2;
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+  }
+  /* layered starfield + eclipse corona glow */
+  #bg {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(circle at 50% -8%, #3a2708 0%, transparent 42%),
+      radial-gradient(circle at 80% 12%, #2a1c0855 0%, transparent 40%),
+      #0a0805;
+  }
+  #bg::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, #fff8, transparent),
+      radial-gradient(1px 1px at 28% 62%, #fff6, transparent),
+      radial-gradient(1px 1px at 47% 33%, #ffe9c088, transparent),
+      radial-gradient(2px 2px at 63% 22%, #ffd98a99, transparent),
+      radial-gradient(1px 1px at 72% 78%, #fff7, transparent),
+      radial-gradient(1px 1px at 88% 47%, #fff5, transparent),
+      radial-gradient(1px 1px at 92% 14%, #ffe9c0aa, transparent),
+      radial-gradient(1px 1px at 8% 84%, #fff6, transparent);
+    background-size: 100% 100%;
+  }
+  ::-webkit-scrollbar { width: 12px; }
+  ::-webkit-scrollbar-track { background: #0a0805; }
+  ::-webkit-scrollbar-thumb { background: #3a2c12; border-radius: 6px; border: 3px solid #0a0805; }
+  ::-webkit-scrollbar-thumb:hover { background: #5a4318; }
+  .se-detail-grid { }
+  @media (max-width: 640px) {
+    html, body { overflow-x: hidden; }
+    .v-pagehead { font-size: 34px !important; }
+    .se-detail-grid { grid-template-columns: 1fr !important; }
+    .se-detail-grid > div:first-child { margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+<script src="wiki/data-dex.js"></script>
+<script type="text/babel" src="wiki/ui.jsx"></script>
+<script type="text/babel" src="wiki/view-pokedex.jsx"></script>
+<script type="text/babel" src="wiki/view-detail.jsx"></script>
+
+<script type="text/babel">
+  function parseHash(h) {
+    const parts = (h || '').replace(/^#\/?/, '').split('/').filter(Boolean);
+    return { view: parts[0] || 'pokedex', param: parts[1] || null };
+  }
+
+  function App() {
+    const [query, setQuery] = React.useState('');
+    const [hash, setHash] = React.useState(window.location.hash || '#/pokedex');
+    React.useEffect(() => {
+      const f = () => { setHash(window.location.hash || '#/pokedex'); window.scrollTo(0, 0); };
+      window.addEventListener('hashchange', f);
+      if (!window.location.hash) window.location.hash = '#/pokedex';
+      return () => window.removeEventListener('hashchange', f);
+    }, []);
+    const { view, param } = parseHash(hash);
+    const onPokedex = view === 'pokedex';
+
+    let content;
+    if (view === 'pokemon') content = <window.VIEWS.Detail param={param} />;
+    else content = <window.VIEWS.Pokedex query={query} />;
+
+    return (
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 24px 64px' }}>
+        {/* top bar */}
+        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '22px 0 26px', flexWrap: 'wrap' }}>
+          <div onClick={() => { window.location.hash = '#/pokedex'; }} style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+            <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'radial-gradient(circle at 38% 38%, #1a1206 0%, #1a1206 52%, transparent 53%), radial-gradient(circle at 50% 50%, #ffb347 0%, #ff8a3c 60%, #6e3c10 100%)', boxShadow: '0 0 18px #ffb34777', position: 'relative' }} />
+            <span style={{ fontFamily: "'Cinzel', Georgia, 'Times New Roman', serif", fontWeight: 700, fontSize: 22, color: '#fff', letterSpacing: 0.5 }}>
+              SOLAR<span style={{ color: '#ffb347' }}>ECLIPSE</span>
+            </span>
+          </div>
+          {onPokedex && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 14px', borderRadius: 10, background: '#0f0b04', border: '1px solid #2a2110', minWidth: 240, flex: '0 1 320px' }}>
+              <span style={{ color: '#7a6c4a', fontSize: 15 }}>⌕</span>
+              <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search the dex…"
+                style={{ border: 'none', outline: 'none', background: 'transparent', color: '#ece3d2', fontFamily: "'Outfit', sans-serif", fontSize: 14, width: '100%' }} />
+              {query && <button onClick={() => setQuery('')} style={{ cursor: 'pointer', background: 'transparent', border: 'none', color: '#7a6c4a', fontSize: 15 }}>×</button>}
+            </div>
+          )}
+        </header>
+
+        {content}
+
+        <footer style={{ marginTop: 48, paddingTop: 22, borderTop: '1px solid #1c1609', color: '#6a5d42', fontFamily: "'Space Mono', monospace", fontSize: 12, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <span>Pokémon Solar Eclipse — Pokédex demo · Brought to you by Vaereth</span>
+          <span>Data generated from Solar_Eclipse_Docs v1.9.0 · {window.VSEDEX.DEX.length} entries</span>
+        </footer>
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
