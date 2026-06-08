@@ -94,12 +94,11 @@ window.VIEWS = window.VIEWS || {};
 
   window.VIEWS.Types = function Types() {
     const [mode, setMode] = React.useState('defense');
-    const [def, setDef] = React.useState(['GHOST', 'ROCK']);
-    const [atk, setAtk] = React.useState(['FIRE']);
+    const [def, setDef] = React.useState([]);
+    const [atk, setAtk] = React.useState([]);
 
     // DEFENSE: for a defending typing, incoming multiplier from each attacking type.
-    const defRows = ORDER.map(a => ({ t: a, m: def.reduce((acc, d) => acc * CHART[a][d], 1) }))
-      .filter(r => r.m !== 1 || true); // include neutrals in their bucket
+    const defRows = def.length ? ORDER.map(a => ({ t: a, m: def.reduce((acc, d) => acc * CHART[a][d], 1) })) : [];
 
     // OFFENSE: for an attacking type, multiplier vs each defending type.
     const atkType = atk[0];
