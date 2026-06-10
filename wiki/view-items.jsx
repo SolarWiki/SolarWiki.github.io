@@ -7,18 +7,24 @@ window.VIEWS = window.VIEWS || {};
   const POCKETS = [
     ['Poké Balls', '#ff7a6f'], ['Medicine', '#ff8f8f'], ['Items', '#cbb88f'],
     ['Evolution', '#7fd17a'], ['Battle Items', '#ffb347'], ['Berries', '#c45fff'],
-    ['Key Items', '#6fa8ff'],
+    ['Key Items', '#6fa8ff'], ['Treasures', '#ffd23c'],
   ];
   const pocketColor = (c) => (POCKETS.find(p => p[0] === c) || [, '#9a8d6f'])[1];
 
   function Card({ it }) {
     const col = pocketColor(it.cat);
+    const iconKey = window.VSE_ITEM_ICON && window.VSE_ITEM_ICON[it.name];
     return (
       <div style={{ background: '#0c0a05', border: `1px solid ${it.changed ? col + '66' : '#241d10'}`, borderRadius: 14, padding: 16 }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-          {/* icon slot (starfield placeholder until real item icons added) */}
-          <div style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 10, border: `1px solid ${col}33`, background: 'radial-gradient(circle at 50% 42%, #2a1c08 0%, #0a0905 75%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: col, boxShadow: `0 0 8px ${col}` }} />
+          {/* icon slot — real item sprite, falls back to a colored dot */}
+          <div style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 10, border: `1px solid ${col}33`, background: 'radial-gradient(circle at 50% 42%, #2a1c08 0%, #0a0905 75%)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+            {iconKey
+              ? <img src={'items/' + iconKey + '.png'} alt={it.name}
+                  onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
+                  style={{ maxWidth: 38, maxHeight: 38, imageRendering: 'pixelated', objectFit: 'contain' }} />
+              : null}
+            <span style={{ display: iconKey ? 'none' : 'block', width: 8, height: 8, borderRadius: '50%', background: col, boxShadow: `0 0 8px ${col}` }} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', marginBottom: 6 }}>
