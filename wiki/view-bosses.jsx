@@ -18,9 +18,15 @@ window.VIEWS = window.VIEWS || {};
   // A single Pokémon card in a boss team
   function MonCard({ m }) {
     const entry = m.dex && byDex[m.dex];
-    const accent = entry ? TYPES[entry.types[0]].glow : '#ffb347';
+    // Fallback species info (types/abilities) for boss Pokémon not in the regional dex.
+    const info = !entry && window.VSE_SPECIES_INFO && window.VSE_SPECIES_INFO[m.sp.toUpperCase()];
+    const types = entry ? entry.types : (info ? info.types : []);
+    const accent = types.length ? TYPES[types[0]].glow : '#ffb347';
     const evs = evList(m.ev);
-    const abilName = entry ? (m.abil === 'H' ? entry.hidden : (entry.abilities[m.abil] || entry.abilities[0])) : null;
+    let abilName = null;
+    if (entry) abilName = (m.abil === 'H' ? entry.hidden : (entry.abilities[m.abil] || entry.abilities[0]));
+    else if (info) abilName = (m.abil === 'H' ? info.hidden : (info.abilities[m.abil] || info.abilities[0] || info.hidden));
+    const isHidden = m.abil === 'H' || (entry && abilName === entry.hidden) || (info && abilName === info.hidden);
     // Sprite key: regional dex if present, else national-sprite fallback by species name.
     const fallback = window.VSE_SPECIES_SPRITE && window.VSE_SPECIES_SPRITE[m.sp.toUpperCase()];
     const spriteKey = m.dex || fallback;
@@ -36,9 +42,9 @@ window.VIEWS = window.VIEWS || {};
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347' }}>Lv {m.lv}</span>
             </div>
             {m.nick && <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, color: '#7a6c4a', textTransform: 'capitalize', marginTop: 1 }}>{entry ? entry.name : m.sp.toLowerCase()}</div>}
-            {entry && <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 5 }}>{entry.types.map(t => <TypePill key={t} t={t} sm onClick={() => {}} />)}</div>}
+            {types.length > 0 && <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 5 }}>{types.map(t => <TypePill key={t} t={t} sm onClick={() => {}} />)}</div>}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 7 }}>
-              {abilName && <AbilityPill name={abilName} hidden={m.abil === 'H' || (entry && abilName === entry.hidden)} />}
+              {abilName && <AbilityPill name={abilName} hidden={isHidden} />}
               {m.item && <ItemPill name={m.item} />}
               {m.nat && <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11.5, color: '#9a8d6f' }}>{m.nat.charAt(0) + m.nat.slice(1).toLowerCase()}</span>}
             </div>
