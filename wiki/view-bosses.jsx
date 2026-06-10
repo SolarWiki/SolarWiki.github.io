@@ -21,11 +21,14 @@ window.VIEWS = window.VIEWS || {};
     const accent = entry ? TYPES[entry.types[0]].glow : '#ffb347';
     const evs = evList(m.ev);
     const abilName = entry ? (m.abil === 'H' ? entry.hidden : (entry.abilities[m.abil] || entry.abilities[0])) : null;
+    // Sprite key: regional dex if present, else national-sprite fallback by species name.
+    const fallback = window.VSE_SPECIES_SPRITE && window.VSE_SPECIES_SPRITE[m.sp.toUpperCase()];
+    const spriteKey = m.dex || fallback;
     return (
       <div style={{ background: '#0d0a04', border: `1px solid ${accent}33`, borderRadius: 12, padding: 12 }}>
         <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
           <button onClick={() => m.dex && go('#/pokemon/' + m.dex)} style={{ cursor: m.dex ? 'pointer' : 'default', background: 'none', border: 'none', padding: 0, flexShrink: 0 }}>
-            <SpriteSlot dex={m.dex} name={m.sp} size={64} accent={accent} />
+            <SpriteSlot dex={spriteKey} name={m.sp} size={64} accent={accent} />
           </button>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 6 }}>
@@ -73,13 +76,11 @@ window.VIEWS = window.VIEWS || {};
       <div style={{ background: 'linear-gradient(160deg, #14100a, #0a0805)', border: `1px solid ${col}33`, borderRadius: 16, padding: 20, marginBottom: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            {b.sprite && (
-              <div style={{ width: 72, height: 72, borderRadius: 12, background: `radial-gradient(circle at 50% 40%, ${col}22, #0a0805)`, border: `1px solid ${col}33`, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
-                <img src={'trainers/' + b.type + '.png'} alt={b.name}
-                  onError={(e) => { if (e.target.src.indexOf('trainers/') !== -1) { e.target.src = b.sprite; } }}
-                  style={{ maxHeight: 70, maxWidth: 70, imageRendering: 'pixelated', objectFit: 'contain' }} />
-              </div>
-            )}
+            <div style={{ width: 72, height: 72, borderRadius: 12, background: `radial-gradient(circle at 50% 40%, ${col}22, #0a0805)`, border: `1px solid ${col}33`, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+              <img src={'trainers/' + b.type + '.png'} alt={b.name}
+                onError={(e) => { if (e.target.src.indexOf('trainers/') !== -1 && b.sprite) { e.target.src = b.sprite; } else { e.target.style.display = 'none'; } }}
+                style={{ maxHeight: 70, maxWidth: 70, imageRendering: 'pixelated', objectFit: 'contain' }} />
+            </div>
             <div>
               <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 800, fontSize: 24, color: '#fff' }}>{b.name}</span>
               <div><span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: col, background: col + '18', border: `1px solid ${col}44`, borderRadius: 7, padding: '3px 9px', textTransform: 'uppercase', display: 'inline-block', marginTop: 5 }}>{b.class}</span></div>
