@@ -60,17 +60,30 @@ window.VIEWS = window.VIEWS || {};
     const [enhanced, setEnhanced] = React.useState(false);
     const col = CLASS_COLOR[b.class] || '#ffb347';
     const battle = b.battles[battleIdx];
-    const hasEnh = !!battle.enhanced;
-    const team = (enhanced && hasEnh) ? battle.enhanced : battle.normal;
+    const hasEnhTeam = !!battle.enhanced;
+    const hasEnhFx = !!(battle.enhFx && battle.enhFx.length);
+    const hasEnh = hasEnhTeam || hasEnhFx; // enhanced exists if a different team OR an effect
+    const team = (enhanced && hasEnhTeam) ? battle.enhanced : battle.normal;
+    const fx = (enhanced && hasEnhFx) ? battle.enhFx : (battle.fx || []);
+    const lv = (battle.normal || []).map(p => p.lv);
 
     React.useEffect(() => { if (!hasEnh) setEnhanced(false); }, [battleIdx, hasEnh]);
 
     return (
       <div style={{ background: 'linear-gradient(160deg, #14100a, #0a0805)', border: `1px solid ${col}33`, borderRadius: 16, padding: 20, marginBottom: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 800, fontSize: 24, color: '#fff' }}>{b.name}</span>
-            <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: col, background: col + '18', border: `1px solid ${col}44`, borderRadius: 7, padding: '3px 9px', textTransform: 'uppercase' }}>{b.class}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            {b.sprite && (
+              <div style={{ width: 72, height: 72, borderRadius: 12, background: `radial-gradient(circle at 50% 40%, ${col}22, #0a0805)`, border: `1px solid ${col}33`, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+                <img src={'trainers/' + b.type + '.png'} alt={b.name}
+                  onError={(e) => { if (e.target.src.indexOf('trainers/') !== -1) { e.target.src = b.sprite; } }}
+                  style={{ maxHeight: 70, maxWidth: 70, imageRendering: 'pixelated', objectFit: 'contain' }} />
+              </div>
+            )}
+            <div>
+              <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 800, fontSize: 24, color: '#fff' }}>{b.name}</span>
+              <div><span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: col, background: col + '18', border: `1px solid ${col}44`, borderRadius: 7, padding: '3px 9px', textTransform: 'uppercase', display: 'inline-block', marginTop: 5 }}>{b.class}</span></div>
+            </div>
           </div>
           {hasEnh && (
             <div style={{ display: 'flex', gap: 0, borderRadius: 9, overflow: 'hidden', border: '1px solid #2a2110' }}>
@@ -85,28 +98,38 @@ window.VIEWS = window.VIEWS || {};
           )}
         </div>
 
-        {/* battle selector */}
+        {/* battle selector (by location) */}
         {b.battles.length > 1 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
             {b.battles.map((bt, i) => {
-              const lv = bt.normal.map(p => p.lv);
+              const blv = (bt.normal || []).map(p => p.lv);
               const on = i === battleIdx;
-              const label = (bt.sub && bt.sub !== 'None') ? bt.sub.replace(/\s*\(Hard\)/i, '') : `Lv ${Math.min(...lv)}`;
               return <button key={i} onClick={() => setBattleIdx(i)} style={{
                 cursor: 'pointer', padding: '5px 11px', borderRadius: 8, fontFamily: "'Outfit', sans-serif", fontSize: 11.5,
                 background: on ? '#2a1c08' : 'transparent', color: on ? '#ffb347' : '#9a8d6f', border: `1px solid ${on ? '#ffb34788' : '#241d10'}`, fontWeight: on ? 600 : 400,
-              }}>{label} <span style={{ opacity: 0.6, fontFamily: "'Space Mono', monospace" }}>Lv{Math.min(...lv)}–{Math.max(...lv)}</span></button>;
+              }}>{bt.loc} {blv.length ? <span style={{ opacity: 0.6, fontFamily: "'Space Mono', monospace" }}>Lv{Math.min(...blv)}–{Math.max(...blv)}</span> : null}</button>;
             })}
           </div>
         )}
 
-        {enhanced && hasEnh && (
-          <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 12, color: '#ff8f8f', marginBottom: 12 }}>★ Enhanced: a harder version with buffs, effects, or an adjusted team.</div>
+        {/* battle effects */}
+        {fx.length > 0 && (
+          <div style={{ background: enhanced ? '#1f0f12' : '#0f0b04', border: `1px solid ${enhanced ? '#5e1f2a' : '#2a2110'}`, borderRadius: 10, padding: '10px 14px', marginBottom: 14 }}>
+            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: 1, color: enhanced ? '#ff8f8f' : '#ffb347', textTransform: 'uppercase', marginBottom: 5 }}>
+              {enhanced ? '★ Enhanced battle effects' : 'Battle effects'}
+            </div>
+            {fx.map((f, i) => <div key={i} style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, color: '#d8cbb0', lineHeight: 1.5 }}>{f}</div>)}
+          </div>
+        )}
+        {enhanced && hasEnhTeam && !hasEnhFx && (
+          <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 12, color: '#ff8f8f', marginBottom: 12 }}>★ Enhanced: a harder version with an adjusted team.</div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
-          {team.map((m, i) => <MonCard key={i} m={m} />)}
-        </div>
+        {team && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+            {team.map((m, i) => <MonCard key={i} m={m} />)}
+          </div>
+        )}
       </div>
     );
   }
