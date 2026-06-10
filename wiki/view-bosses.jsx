@@ -76,7 +76,7 @@ window.VIEWS = window.VIEWS || {};
       <div style={{ background: 'linear-gradient(160deg, #14100a, #0a0805)', border: `1px solid ${col}33`, borderRadius: 16, padding: 20, marginBottom: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 72, height: 72, borderRadius: 12, background: `radial-gradient(circle at 50% 40%, ${col}22, #0a0805)`, border: `1px solid ${col}33`, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+            <div style={{ width: 72, height: 72, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
               <img src={'trainers/' + b.type + '.png'} alt={b.name}
                 onError={(e) => { if (e.target.src.indexOf('trainers/') !== -1 && b.sprite) { e.target.src = b.sprite; } else { e.target.style.display = 'none'; } }}
                 style={{ maxHeight: 70, maxWidth: 70, imageRendering: 'pixelated', objectFit: 'contain' }} />
