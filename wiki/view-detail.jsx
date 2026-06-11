@@ -160,21 +160,35 @@ window.VIEWS = window.VIEWS || {};
           ))}
         </div>
 
-        {tab === 'level' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            {ls.level.map(([lv, mv], i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347', width: 38, flexShrink: 0, textAlign: 'right' }}>{lv === 0 || lv === 1 ? '—' : 'Lv' + lv}</span>
-                <MovePill name={mv} />
-              </div>
-            ))}
-          </div>
-        )}
-        {tab !== 'level' && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {(tab === 'egg' ? ls.egg : tab === 'tm' ? ls.tms : ls.tutor).map((mv, i) => <MovePill key={i} name={mv} />)}
-          </div>
-        )}
+        {(() => {
+          // Stable min-height so switching to a shorter tab doesn't collapse the panel.
+          const rowH = 29;            // height of one level-up row
+          const wrapRowH = 34;        // approx height of a wrapped pill row (~6 pills/row)
+          const levelH = ls.level.length * rowH;
+          const eggH = Math.ceil(ls.egg.length / 6) * wrapRowH;
+          const tmH = Math.ceil(ls.tms.length / 6) * wrapRowH;
+          const tutorH = Math.ceil(ls.tutor.length / 6) * wrapRowH;
+          const minH = Math.max(levelH, eggH, tmH, tutorH, 40);
+          return (
+            <div style={{ minHeight: minH }}>
+              {tab === 'level' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  {ls.level.map(([lv, mv], i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347', width: 38, flexShrink: 0, textAlign: 'right' }}>{lv === 0 || lv === 1 ? '—' : 'Lv' + lv}</span>
+                      <MovePill name={mv} />
+                    </div>
+                  ))}
+                </div>
+              )}
+              {tab !== 'level' && (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {(tab === 'egg' ? ls.egg : tab === 'tm' ? ls.tms : ls.tutor).map((mv, i) => <MovePill key={i} name={mv} />)}
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
     );
   }
