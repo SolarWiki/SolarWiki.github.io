@@ -128,16 +128,54 @@ window.VIEWS = window.VIEWS || {};
   }
 
   // ---- Learnset (level-up / egg / TM moves) ------------------------------
+  // Category badge colors (Physical / Special / Status)
+  const CAT_STYLE = {
+    Physical: { bg: '#c0392b', label: 'PHY' },
+    Special: { bg: '#3b6fb5', label: 'SPC' },
+    Status: { bg: '#6b6b6b', label: 'STA' },
+  };
+  function CatBadge({ cls }) {
+    const c = CAT_STYLE[cls] || CAT_STYLE.Status;
+    return (
+      <span title={cls} style={{
+        fontFamily: "'Space Mono', monospace", fontSize: 9, fontWeight: 700, letterSpacing: 0.5, color: '#fff',
+        background: c.bg, borderRadius: 4, padding: '2px 5px', flexShrink: 0, width: 30, textAlign: 'center', display: 'inline-block',
+      }}>{c.label}</span>
+    );
+  }
+  function MoveRow({ mv, lvl }) {
+    const TypePill = window.VUI.TypePill;
+    const TYPES = window.VUI.TYPES;
+    const norm = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const info = (window.VSE_MOVES || []).find(m => norm(m.name) === norm(mv));
+    const name = info ? info.name : mv.toLowerCase().replace(/_/g, ' ');
+    const type = info ? info.type : null;
+    const cls = info ? info.cls : 'Status';
+    const [hov, setHov] = React.useState(false);
+    return (
+      <button onClick={() => go('#/moves/' + encodeURIComponent(info ? info.name : mv))}
+        onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+        style={{
+          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left',
+          padding: '7px 11px', borderRadius: 9, background: hov ? '#1b1408' : '#100c05',
+          border: `1px solid ${hov ? '#5a4318' : '#241d10'}`,
+        }}>
+        {lvl !== undefined && (
+          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347', width: 40, flexShrink: 0, textAlign: 'right' }}>{lvl === 0 || lvl === 1 ? '—' : 'Lv' + lvl}</span>
+        )}
+        <CatBadge cls={cls} />
+        <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13.5, color: hov ? '#fff' : '#e6dcc6', textTransform: 'capitalize', flex: 1, minWidth: 0, fontWeight: 500 }}>{name}</span>
+        {type && <TypePill t={type} sm onClick={() => {}} />}
+        {info && typeof info.pow === 'number' && info.pow > 0 && (
+          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: '#9a8d6f', width: 34, textAlign: 'right', flexShrink: 0 }}>{info.pow}</span>
+        )}
+      </button>
+    );
+  }
   function Learnset({ d }) {
     const [tab, setTab] = React.useState('level');
     const ls = window.VSE_LEARN && window.VSE_LEARN[d.dex];
     if (!ls) return null;
-    const MovePill = window.VUI.MovePill;
-    const MOVES = window.VSE_MOVES || [];
-    const norm = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-    const moveInfo = {};
-    MOVES.forEach(m => { moveInfo[norm(m.name)] = m; });
-    const niceName = (mv) => { const i = moveInfo[norm(mv)]; return i ? i.name : mv.toLowerCase().replace(/_/g, ' '); };
 
     const tabs = [
       ['level', 'Level-up', ls.level.length],
@@ -147,6 +185,15 @@ window.VIEWS = window.VIEWS || {};
     ].filter(t => t[2] > 0);
     if (!tabs.length) return null;
     React.useEffect(() => { if (!tabs.find(t => t[0] === tab)) setTab(tabs[0][0]); }, [d.dex]);
+
+    // stable min-height across tabs (each row ~38px) so switching doesn't jolt the layout
+    const rowH = 38;
+    const counts = { level: ls.level.length, egg: ls.egg.length, tm: ls.tms.length, tutor: ls.tutor.length };
+    const minH = Math.max(...Object.values(counts)) * rowH;
+
+    const rows = tab === 'level'
+      ? ls.level.map(([lv, mv], i) => <MoveRow key={i} mv={mv} lvl={lv} />)
+      : (tab === 'egg' ? ls.egg : tab === 'tm' ? ls.tms : ls.tutor).map((mv, i) => <MoveRow key={i} mv={mv} />);
 
     return (
       <div style={{ marginTop: 26 }}>
@@ -159,36 +206,9 @@ window.VIEWS = window.VIEWS || {};
             }}>{label} <span style={{ opacity: 0.6, fontFamily: "'Space Mono', monospace" }}>{n}</span></button>
           ))}
         </div>
-
-        {(() => {
-          // Stable min-height so switching to a shorter tab doesn't collapse the panel.
-          const rowH = 29;            // height of one level-up row
-          const wrapRowH = 34;        // approx height of a wrapped pill row (~6 pills/row)
-          const levelH = ls.level.length * rowH;
-          const eggH = Math.ceil(ls.egg.length / 6) * wrapRowH;
-          const tmH = Math.ceil(ls.tms.length / 6) * wrapRowH;
-          const tutorH = Math.ceil(ls.tutor.length / 6) * wrapRowH;
-          const minH = Math.max(levelH, eggH, tmH, tutorH, 40);
-          return (
-            <div style={{ minHeight: minH }}>
-              {tab === 'level' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                  {ls.level.map(([lv, mv], i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347', width: 38, flexShrink: 0, textAlign: 'right' }}>{lv === 0 || lv === 1 ? '—' : 'Lv' + lv}</span>
-                      <MovePill name={mv} />
-                    </div>
-                  ))}
-                </div>
-              )}
-              {tab !== 'level' && (
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  {(tab === 'egg' ? ls.egg : tab === 'tm' ? ls.tms : ls.tutor).map((mv, i) => <MovePill key={i} name={mv} />)}
-                </div>
-              )}
-            </div>
-          );
-        })()}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, minHeight: minH }}>
+          {rows}
+        </div>
       </div>
     );
   }
