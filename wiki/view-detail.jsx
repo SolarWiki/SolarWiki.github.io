@@ -174,7 +174,7 @@ window.VIEWS = window.VIEWS || {};
     const cols = (showLevel ? '46px ' : '') + '38px 1fr 44px 76px';
     const cell = { fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 1, color: '#6f6450', textTransform: 'uppercase' };
     return (
-      <div style={{ display: 'grid', gridTemplateColumns: cols, alignItems: 'center', columnGap: 10, padding: '0 12px 2px', width: '100%', border: '1px solid transparent', borderBottom: 'none' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: cols, alignItems: 'center', columnGap: 10, padding: '0 12px 2px', width: '100%', boxSizing: 'border-box', border: '1px solid transparent', borderBottom: 'none' }}>
         {showLevel && <span style={{ ...cell, textAlign: 'right' }}>Lv</span>}
         <span style={{ ...cell, textAlign: 'center' }}>Cat</span>
         <span style={cell}>Move</span>
