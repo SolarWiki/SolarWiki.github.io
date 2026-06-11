@@ -165,8 +165,8 @@ window.VIEWS = window.VIEWS || {};
         {showLevel && <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347', textAlign: 'right' }}>{lvl === 0 || lvl === 1 ? '—' : 'Lv' + lvl}</span>}
         <span style={{ display: 'flex', justifyContent: 'center' }}><CatBadge cls={cls} /></span>
         <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13.5, color: hov ? '#fff' : '#e6dcc6', textTransform: 'capitalize', minWidth: 0, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
-        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#9a8d6f', textAlign: 'left' }}>{pow !== null ? pow : '–'}</span>
-        <span style={{ display: 'flex', justifyContent: 'flex-start' }}>{type && <TypePill t={type} sm onClick={() => {}} />}</span>
+        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#9a8d6f', textAlign: 'center' }}>{pow !== null ? pow : '–'}</span>
+        <span style={{ display: 'flex', justifyContent: 'center' }}>{type && <TypePill t={type} sm onClick={() => {}} />}</span>
       </button>
     );
   }
@@ -174,12 +174,12 @@ window.VIEWS = window.VIEWS || {};
     const cols = (showLevel ? '46px ' : '') + '38px 1fr 44px 76px';
     const cell = { fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 1, color: '#6f6450', textTransform: 'uppercase' };
     return (
-      <div style={{ display: 'grid', gridTemplateColumns: cols, alignItems: 'center', columnGap: 10, padding: '0 12px 2px', width: '100%' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: cols, alignItems: 'center', columnGap: 10, padding: '0 12px 2px', width: '100%', border: '1px solid transparent', borderBottom: 'none' }}>
         {showLevel && <span style={{ ...cell, textAlign: 'right' }}>Lv</span>}
         <span style={{ ...cell, textAlign: 'center' }}>Cat</span>
         <span style={cell}>Move</span>
-        <span style={{ ...cell, textAlign: 'left' }}>Pwr</span>
-        <span style={{ ...cell, textAlign: 'left' }}>Type</span>
+        <span style={{ ...cell, textAlign: 'center' }}>Pwr</span>
+        <span style={{ ...cell, textAlign: 'center' }}>Type</span>
       </div>
     );
   }
