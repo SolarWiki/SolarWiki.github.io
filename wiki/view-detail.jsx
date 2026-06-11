@@ -165,10 +165,12 @@ window.VIEWS = window.VIEWS || {};
         )}
         <CatBadge cls={cls} />
         <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13.5, color: hov ? '#fff' : '#e6dcc6', textTransform: 'capitalize', flex: 1, minWidth: 0, fontWeight: 500 }}>{name}</span>
-        {type && <TypePill t={type} sm onClick={() => {}} />}
-        {info && typeof info.pow === 'number' && info.pow > 0 && (
-          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: '#9a8d6f', width: 34, textAlign: 'right', flexShrink: 0 }}>{info.pow}</span>
-        )}
+        {info && typeof info.pow === 'number' && info.pow > 0
+          ? <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: '#9a8d6f', width: 30, textAlign: 'right', flexShrink: 0 }}>{info.pow}</span>
+          : <span style={{ width: 30, flexShrink: 0 }} />}
+        <span style={{ width: 78, flexShrink: 0, display: 'flex', justifyContent: 'flex-end' }}>
+          {type && <TypePill t={type} sm onClick={() => {}} />}
+        </span>
       </button>
     );
   }
