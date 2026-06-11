@@ -143,7 +143,7 @@ window.VIEWS = window.VIEWS || {};
       }}>{c.label}</span>
     );
   }
-  function MoveRow({ mv, lvl }) {
+  function MoveRow({ mv, lvl, showLevel }) {
     const TypePill = window.VUI.TypePill;
     const TYPES = window.VUI.TYPES;
     const norm = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -151,27 +151,36 @@ window.VIEWS = window.VIEWS || {};
     const name = info ? info.name : mv.toLowerCase().replace(/_/g, ' ');
     const type = info ? info.type : null;
     const cls = info ? info.cls : 'Status';
+    const pow = (info && typeof info.pow === 'number' && info.pow > 0) ? info.pow : null;
     const [hov, setHov] = React.useState(false);
+    const cols = (showLevel ? '46px ' : '') + '38px 1fr 44px 76px';
     return (
       <button onClick={() => go('#/moves/' + encodeURIComponent(info ? info.name : mv))}
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
         style={{
-          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left',
-          padding: '7px 11px', borderRadius: 9, background: hov ? '#1b1408' : '#100c05',
+          cursor: 'pointer', display: 'grid', gridTemplateColumns: cols, alignItems: 'center', columnGap: 10, width: '100%', textAlign: 'left',
+          padding: '7px 12px', borderRadius: 9, background: hov ? '#1b1408' : '#100c05',
           border: `1px solid ${hov ? '#5a4318' : '#241d10'}`,
         }}>
-        {lvl !== undefined && (
-          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347', width: 40, flexShrink: 0, textAlign: 'right' }}>{lvl === 0 || lvl === 1 ? '—' : 'Lv' + lvl}</span>
-        )}
-        <CatBadge cls={cls} />
-        <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13.5, color: hov ? '#fff' : '#e6dcc6', textTransform: 'capitalize', flex: 1, minWidth: 0, fontWeight: 500 }}>{name}</span>
-        {info && typeof info.pow === 'number' && info.pow > 0
-          ? <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: '#9a8d6f', width: 30, textAlign: 'right', flexShrink: 0 }}>{info.pow}</span>
-          : <span style={{ width: 30, flexShrink: 0 }} />}
-        <span style={{ width: 78, flexShrink: 0, display: 'flex', justifyContent: 'flex-end' }}>
-          {type && <TypePill t={type} sm onClick={() => {}} />}
-        </span>
+        {showLevel && <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347', textAlign: 'right' }}>{lvl === 0 || lvl === 1 ? '—' : 'Lv' + lvl}</span>}
+        <span style={{ display: 'flex', justifyContent: 'center' }}><CatBadge cls={cls} /></span>
+        <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13.5, color: hov ? '#fff' : '#e6dcc6', textTransform: 'capitalize', minWidth: 0, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#9a8d6f', textAlign: 'center' }}>{pow !== null ? pow : '–'}</span>
+        <span style={{ display: 'flex', justifyContent: 'center' }}>{type && <TypePill t={type} sm onClick={() => {}} />}</span>
       </button>
+    );
+  }
+  function MoveHeader({ showLevel }) {
+    const cols = (showLevel ? '46px ' : '') + '38px 1fr 44px 76px';
+    const cell = { fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 1, color: '#6f6450', textTransform: 'uppercase' };
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: cols, alignItems: 'center', columnGap: 10, padding: '0 12px 2px', width: '100%' }}>
+        {showLevel && <span style={{ ...cell, textAlign: 'right' }}>Lv</span>}
+        <span style={{ ...cell, textAlign: 'center' }}>Cat</span>
+        <span style={cell}>Move</span>
+        <span style={{ ...cell, textAlign: 'center' }}>Pwr</span>
+        <span style={{ ...cell, textAlign: 'center' }}>Type</span>
+      </div>
     );
   }
   function Learnset({ d }) {
@@ -193,8 +202,9 @@ window.VIEWS = window.VIEWS || {};
     const counts = { level: ls.level.length, egg: ls.egg.length, tm: ls.tms.length, tutor: ls.tutor.length };
     const minH = Math.max(...Object.values(counts)) * rowH;
 
+    const showLevel = tab === 'level';
     const rows = tab === 'level'
-      ? ls.level.map(([lv, mv], i) => <MoveRow key={i} mv={mv} lvl={lv} />)
+      ? ls.level.map(([lv, mv], i) => <MoveRow key={i} mv={mv} lvl={lv} showLevel />)
       : (tab === 'egg' ? ls.egg : tab === 'tm' ? ls.tms : ls.tutor).map((mv, i) => <MoveRow key={i} mv={mv} />);
 
     return (
@@ -208,7 +218,8 @@ window.VIEWS = window.VIEWS || {};
             }}>{label} <span style={{ opacity: 0.6, fontFamily: "'Space Mono', monospace" }}>{n}</span></button>
           ))}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, minHeight: minH }}>
+        <MoveHeader showLevel={showLevel} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, minHeight: minH, marginTop: 4 }}>
           {rows}
         </div>
       </div>
