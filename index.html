@@ -67,6 +67,9 @@
 <script type="text/babel" src="wiki/view-items.jsx"></script>
 <script type="text/babel" src="wiki/view-tms.jsx"></script>
 <script type="text/babel" src="wiki/view-bosses.jsx"></script>
+<script src="wiki/compat-game.js"></script>
+<script type="text/babel" src="wiki/view-damage.jsx"></script>
+<script type="text/babel" src="wiki/view-team.jsx"></script>
 
 <script type="text/babel">
   function parseHash(h) {
@@ -94,9 +97,11 @@
     else if (view === 'moves') content = <window.VIEWS.Moves param={param} />;
     else if (view === 'items') content = <window.VIEWS.Items param={param} />;
     else if (view === 'tms') content = <window.VIEWS.TMs />;
+    else if (view === 'team') content = <window.VIEWS.Team />;
+    else if (view === 'damage') content = <window.VIEWS.Damage />;
     else content = <window.VIEWS.Pokedex query={query} />;
 
-    const NAV = [['pokedex', 'Pokédex'], ['bosses', 'Bosses'], ['types', 'Type Calc'], ['abilities', 'Abilities'], ['moves', 'Moves'], ['items', 'Items'], ['tms', 'TMs']];
+    const NAV = [['pokedex', 'Pokédex'], ['bosses', 'Bosses'], ['types', 'Type Calc'], ['abilities', 'Abilities'], ['moves', 'Moves'], ['items', 'Items'], ['tms', 'TMs'], ['team', 'Team Builder'], ['damage', 'Damage Calc']];
 
     return (
       <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 24px 64px' }}>
