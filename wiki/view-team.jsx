@@ -76,14 +76,22 @@ window.VIEWS = window.VIEWS || {};
     const natList = (S().NATURE_LIST) || ['Hardy'];
     const ni = Math.max(0, natList.indexOf(m.nature || 'Hardy'));
     const ivs = m.ivs || defIVs(), evs = m.evs || defEVs();
-    const ivStr = SKEYS.map(k => (ivs[k] == null ? 31 : ivs[k]).toString(36)).join('');           // 6 chars
-    const evStr = SKEYS.map(k => Math.max(0, Math.min(252, evs[k] | 0)).toString(36).padStart(2, '0')).join(''); // 12 chars
-    return '-' + ni.toString(36) + ivStr + evStr;
+    // Compact '=' format: only encode stats that differ from the default
+    // (IV 31, EV 0). Layout:  =<nat b36>[ i<mask b36><iv b36 each set bit> ][ e<mask b36><ev 2ch each set bit> ]
+    // mask is a 6-bit value (bit k = stat k present), base36 (1 char, max 63 = 'World'→ within 2 chars; 6 bits ≤ 63 = 1 char up to 'z'? 63>35 so may be 2). Use base36 padded to fit ≤63 → up to 2 chars; we cap at 1 by using 0..63 → use toString(36) which is ≤ 2 chars. Keep simple: 2-char mask.
+    let out = '=' + ni.toString(36);
+    let ivMask = 0; const ivVals = [];
+    SKEYS.forEach((k, idx) => { const v = (ivs[k] == null ? 31 : ivs[k]); if (v !== 31) { ivMask |= (1 << idx); ivVals.push(v.toString(36)); } });
+    if (ivMask) out += 'i' + ivMask.toString(36).padStart(2, '0') + ivVals.join('');
+    let evMask = 0; const evVals = [];
+    SKEYS.forEach((k, idx) => { const v = Math.max(0, Math.min(252, evs[k] | 0)); if (v !== 0) { evMask |= (1 << idx); evVals.push(v.toString(36).padStart(2, '0')); } });
+    if (evMask) out += 'e' + evMask.toString(36).padStart(2, '0') + evVals.join('');
+    return out;
   }
   // ability pool for a dex (abilities + hidden), matching the battle engine's order
   function _abilityPool(dex) {
     try {
-      const V = window.VSEDEX; const d = V && V.byDex ? V.byDex(dex) : null;
+      const V = window.VSEDEX; const d = V && V.byDex ? (V.byDex[String(dex).padStart(3,'0')] || V.byDex[dex]) : null;
       if (!d) return [];
       const seen = []; const push = a => { if (a && !seen.some(x => x.toLowerCase() === a.toLowerCase())) seen.push(a); };
       (d.abilities || []).forEach(push); if (d.hidden) push(d.hidden);
@@ -128,14 +136,27 @@ window.VIEWS = window.VIEWS || {};
     }
     return out;
   }
-  function _parseSpec(specStr) {
-    // new fixed-width form (after '-'):  <natB36 1><6 IV b36><12 EV b36>  (19 total minus marker = 19 chars)
-    // legacy form (after '*'):           <natB36>i<6 IV b36>e<12 EV b36>
+  function _parseSpec(specStr, marker) {
     try {
       const natList = (S().NATURE_LIST) || ['Hardy'];
       const ivs = {}, evs = {};
-      if (specStr.indexOf('i') >= 0 && specStr.indexOf('e') > specStr.indexOf('i')) {
-        // legacy '*' form with i/e separators
+      if (marker === '=') {
+        // compact: nat then optional i<mask2><iv each> and e<mask2><ev 2ch each>
+        SKEYS.forEach(k => { ivs[k] = 31; evs[k] = 0; });
+        const ni = parseInt(specStr[0] || '0', 36) || 0;
+        let p = 1;
+        if (specStr[p] === 'i') {
+          const mask = parseInt(specStr.slice(p + 1, p + 3), 36) || 0; p += 3;
+          SKEYS.forEach((k, idx) => { if (mask & (1 << idx)) { ivs[k] = Math.max(0, Math.min(31, parseInt(specStr[p++] || 'v', 36) || 0)); } });
+        }
+        if (specStr[p] === 'e') {
+          const mask = parseInt(specStr.slice(p + 1, p + 3), 36) || 0; p += 3;
+          SKEYS.forEach((k, idx) => { if (mask & (1 << idx)) { evs[k] = Math.max(0, Math.min(252, parseInt(specStr.slice(p, p + 2), 36) || 0)); p += 2; } });
+        }
+        return { nature: natList[ni] || 'Hardy', ivs, evs };
+      }
+      if (marker === '*') {
+        // legacy: <natB36>i<6 IV>e<12 EV>
         const iPos = specStr.indexOf('i'), ePos = specStr.indexOf('e', iPos + 1);
         const ni = parseInt(specStr.slice(0, iPos), 36) || 0;
         const ivPart = specStr.slice(iPos + 1, ePos), evPart = specStr.slice(ePos + 1);
@@ -145,7 +166,7 @@ window.VIEWS = window.VIEWS || {};
         });
         return { nature: natList[ni] || 'Hardy', ivs, evs };
       }
-      // new fixed-width form: char0 = nature, chars 1-6 = IVs, chars 7-18 = EVs (2 each)
+      // '-' fixed-width: char0 = nature, 1-6 = IVs, 7-18 = EVs (2 each)
       const ni = parseInt(specStr[0] || '0', 36) || 0;
       const ivPart = specStr.slice(1, 7), evPart = specStr.slice(7, 19);
       SKEYS.forEach((k, idx) => {
@@ -156,14 +177,18 @@ window.VIEWS = window.VIEWS || {};
     } catch (e) { return null; }
   }
   // find where the spec marker starts in a member's after-dot string, without
-  // mistaking a '-' inside a literal <Move-Name> for the marker.
+  // mistaking a marker char inside a literal <Move-Name> for the real marker.
+  // Returns [movesStr, specStr, marker].
   function _specSplit(afterDot) {
     const lastGt = afterDot.lastIndexOf('>');          // end of any literal move names
     const searchFrom = lastGt >= 0 ? lastGt + 1 : 0;
-    let pos = afterDot.indexOf('-', searchFrom);        // new marker
-    if (pos < 0) pos = afterDot.indexOf('*', searchFrom); // legacy marker
-    if (pos < 0) return [afterDot, ''];
-    return [afterDot.slice(0, pos), afterDot.slice(pos + 1)];
+    let pos = -1, marker = '';
+    for (const mk of ['=', '-', '*']) {                 // '=' compact, '-' fixed-width, '*' legacy
+      const p = afterDot.indexOf(mk, searchFrom);
+      if (p >= 0 && (pos < 0 || p < pos)) { pos = p; marker = mk; }
+    }
+    if (pos < 0) return [afterDot, '', ''];
+    return [afterDot.slice(0, pos), afterDot.slice(pos + 1), marker];
   }
   function decodeTeam(code) {
     try {
@@ -190,11 +215,12 @@ window.VIEWS = window.VIEWS || {};
             const ai = parseInt(idxStr, 36);
             if (pool && pool[ai]) abilityName = pool[ai];
           }
-          const [movesStr, specStr] = _specSplit(afterDot);
+          const [movesStr, specStr, marker] = _specSplit(afterDot);
           const base = { dex: padDex(parseInt(dexRaw, 36)), moves: _parseMoveIds(movesStr) };
-          const spec = specStr ? _parseSpec(specStr) : null;
+          const spec = specStr ? _parseSpec(specStr, marker) : null;
           const out = spec ? { ...base, ...spec } : base;
           if (abilityName) out.ability = abilityName;
+          else { const pool0 = _abilityPool(out.dex); if (pool0 && pool0[0]) out.ability = pool0[0]; }
           return out;
         }) : [];
         return { id: 'L' + Date.now(), name: name || 'Imported Team', members };

@@ -21,6 +21,24 @@
 
   window.VGAME = { eff, CHART, TYPE_ORDER, byMove, MOVES: window.VSE_MOVES };
 
+  // ---- Stable 2-char move-id codec (for team share codes) ----
+  // Each move maps to a fixed 2-char base-36 id from its index in a name-sorted
+  // list, so ids are stable across sessions regardless of VSE_MOVES order.
+  (function () {
+    const sorted = (window.VSE_MOVES || []).map(m => m.name).sort((a, b) => a.localeCompare(b));
+    const toId = {}, fromId = {};
+    const B36 = '0123456789abcdefghijklmnopqrstuvwxyz';
+    const enc2 = (n) => B36[Math.floor(n / 36) % 36] + B36[n % 36];
+    sorted.forEach((name, i) => {
+      const id = enc2(i + 1); // +1 so id '00' is never a real move
+      toId[normName(name)] = id;
+      fromId[id] = name;
+    });
+    function normName(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+    window.VGAME.moveToId = (name) => toId[normName(name)] || null;
+    window.VGAME.idToMove = (id) => fromId[id] || null;
+  })();
+
   // ---- Stat / nature helpers (window.VSTATS) ----
   const NATURES = {
     Hardy: null, Lonely: ['ATK', 'DEF'], Brave: ['ATK', 'SPE'], Adamant: ['ATK', 'SPA'], Naughty: ['ATK', 'SPD'],
@@ -47,5 +65,5 @@
   function maxIVs() { return { HP: 31, ATK: 31, DEF: 31, SPA: 31, SPD: 31, SPE: 31 }; }
   function freshEVs() { return { HP: 0, ATK: 0, DEF: 0, SPA: 0, SPD: 0, SPE: 0 }; }
 
-  window.VSTATS = { NATURES, natureMultFor, calcStat, maxIVs, freshEVs };
+  window.VSTATS = { NATURES, NATURE_LIST: Object.keys(NATURES), natureMultFor, calcStat, maxIVs, freshEVs };
 })();
