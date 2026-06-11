@@ -166,7 +166,7 @@ window.VIEWS = window.VIEWS || {};
         <span style={{ display: 'flex', justifyContent: 'center' }}><CatBadge cls={cls} /></span>
         <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13.5, color: hov ? '#fff' : '#e6dcc6', textTransform: 'capitalize', minWidth: 0, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
         <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#9a8d6f', textAlign: 'center' }}>{pow !== null ? pow : '–'}</span>
-        <span style={{ display: 'flex', justifyContent: 'center' }}>{type && <TypePill t={type} sm onClick={() => {}} />}</span>
+        <span style={{ display: 'flex', justifyContent: 'flex-start' }}>{type && <TypePill t={type} sm onClick={() => {}} />}</span>
       </button>
     );
   }
@@ -179,7 +179,7 @@ window.VIEWS = window.VIEWS || {};
         <span style={{ ...cell, textAlign: 'center' }}>Cat</span>
         <span style={cell}>Move</span>
         <span style={{ ...cell, textAlign: 'center' }}>Pwr</span>
-        <span style={{ ...cell, textAlign: 'center' }}>Type</span>
+        <span style={{ ...cell, textAlign: 'left', paddingLeft: 6 }}>Type</span>
       </div>
     );
   }
