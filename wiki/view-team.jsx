@@ -231,8 +231,18 @@ window.VIEWS = window.VIEWS || {};
 
   // a mon's learnable move names (deduped) from level/TM/egg lists
   function learnableMoves(dex) {
-    const m = byDex(dex); if (!m) return [];
-    const all = [...(m.levelMoves || []), ...(m.tmMoves || []), ...(m.eggMoves || [])].map(x => x.name || x).filter(Boolean);
+    const ls = window.VSE_LEARN && window.VSE_LEARN[String(dex)];
+    if (!ls) return [];
+    const norm = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const info = {};
+    (window.VSE_MOVES || []).forEach(mv => { info[norm(mv.name)] = mv.name; });
+    const nice = (mv) => info[norm(mv)] || mv;
+    const all = [
+      ...ls.level.map(x => nice(x[1])),
+      ...ls.tms.map(nice),
+      ...ls.egg.map(nice),
+      ...ls.tutor.map(nice),
+    ].filter(Boolean);
     return Array.from(new Set(all)).sort((a, b) => a.localeCompare(b));
   }
 

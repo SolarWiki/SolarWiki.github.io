@@ -127,6 +127,58 @@ window.VIEWS = window.VIEWS || {};
     );
   }
 
+  // ---- Learnset (level-up / egg / TM moves) ------------------------------
+  function Learnset({ d }) {
+    const [tab, setTab] = React.useState('level');
+    const ls = window.VSE_LEARN && window.VSE_LEARN[d.dex];
+    if (!ls) return null;
+    const MovePill = window.VUI.MovePill;
+    const MOVES = window.VSE_MOVES || [];
+    const norm = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const moveInfo = {};
+    MOVES.forEach(m => { moveInfo[norm(m.name)] = m; });
+    const niceName = (mv) => { const i = moveInfo[norm(mv)]; return i ? i.name : mv.toLowerCase().replace(/_/g, ' '); };
+
+    const tabs = [
+      ['level', 'Level-up', ls.level.length],
+      ['egg', 'Egg', ls.egg.length],
+      ['tm', 'TM', ls.tms.length],
+      ['tutor', 'Tutor', ls.tutor.length],
+    ].filter(t => t[2] > 0);
+    if (!tabs.length) return null;
+    React.useEffect(() => { if (!tabs.find(t => t[0] === tab)) setTab(tabs[0][0]); }, [d.dex]);
+
+    return (
+      <div style={{ marginTop: 26 }}>
+        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 600, color: '#8a7d63', marginBottom: 12, letterSpacing: 1, textTransform: 'uppercase' }}>Learnable Moves</div>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
+          {tabs.map(([id, label, n]) => (
+            <button key={id} onClick={() => setTab(id)} style={{
+              cursor: 'pointer', padding: '6px 13px', borderRadius: 8, fontFamily: "'Outfit', sans-serif", fontSize: 12, fontWeight: tab === id ? 600 : 500,
+              background: tab === id ? '#2a1c08' : 'transparent', color: tab === id ? '#ffb347' : '#9a8d6f', border: `1px solid ${tab === id ? '#ffb34788' : '#241d10'}`,
+            }}>{label} <span style={{ opacity: 0.6, fontFamily: "'Space Mono', monospace" }}>{n}</span></button>
+          ))}
+        </div>
+
+        {tab === 'level' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            {ls.level.map(([lv, mv], i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347', width: 38, flexShrink: 0, textAlign: 'right' }}>{lv === 0 || lv === 1 ? '—' : 'Lv' + lv}</span>
+                <MovePill name={mv} />
+              </div>
+            ))}
+          </div>
+        )}
+        {tab !== 'level' && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {(tab === 'egg' ? ls.egg : tab === 'tm' ? ls.tms : ls.tutor).map((mv, i) => <MovePill key={i} name={mv} />)}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // ---- Full detail page --------------------------------------------------
   window.VIEWS.Detail = function Detail({ param }) {
     const d = byDex[param];
@@ -179,6 +231,7 @@ window.VIEWS = window.VIEWS || {};
             )}
             <StatBlock entry={cur} vanilla={vi === 0 ? (window.VSE_VANILLA && window.VSE_VANILLA[d.dex]) : null} />
             {vi === 0 && <EvoFamily d={d} />}
+            {vi === 0 && <Learnset d={d} />}
             <ShinyShowcase d={d} accent={accent} vi={vi} />
           </div>
         </div>

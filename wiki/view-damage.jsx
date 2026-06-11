@@ -50,14 +50,27 @@ window.VIEWS = window.VIEWS || {};
     const typeMult = defr.mon.types.reduce((m, t) => m * eff(move.type, t), 1);
     // STAB
     const stab = atkr.mon.types.includes(move.type) ? 1.5 : 1;
-    // item / ability modifiers (light: Life Orb, Choice, type-boost)
+    // item modifiers (damage-affecting held items)
     let mod = 1;
-    if (atkr.item === 'Life Orb') mod *= 1.3;
-    if (atkr.item === 'Choice (Atk/SpA)' && ((physical && true) || (!physical && true))) mod *= 1.5;
-    if (atkr.item === 'Type Booster' && atkr.mon.types.includes(move.type)) mod *= 1.2;
-    if (atkr.ability === 'Adaptability' && stab === 1.5) { /* handled below */ }
+    const it = atkr.item;
+    if (it === 'Life Orb') mod *= 1.3;
+    else if (it === 'Choice Band' && physical) mod *= 1.5;
+    else if (it === 'Choice Specs' && !physical) mod *= 1.5;
+    else if (it === 'Expert Belt' && typeMult > 1) mod *= 1.2;
+    else if (it === 'Muscle Band' && physical) mod *= 1.1;
+    else if (it === 'Wise Glasses' && !physical) mod *= 1.1;
+    else if (TYPE_BOOST_ITEMS[it] && atkr.mon.types.includes(TYPE_BOOST_ITEMS[it])) mod *= 1.2;
+    else if (TYPE_BOOST_ITEMS[it] && move.type === TYPE_BOOST_ITEMS[it]) mod *= 1.2;
 
-    const stabFinal = (atkr.ability === 'Adaptability' && stab === 1.5) ? 2 : stab;
+    // ability modifiers
+    const ab = atkr.ability;
+    if (ab === 'Technician' && power <= 60) mod *= 1.5;
+    if ((ab === 'Blaze' && move.type === 'FIRE') || (ab === 'Torrent' && move.type === 'WATER') ||
+        (ab === 'Overgrow' && move.type === 'GRASS') || (ab === 'Swarm' && move.type === 'BUG')) mod *= 1.5; // pinch (assumed active)
+    if (ab === 'Sheer Force') mod *= 1.3;
+    if (ab === 'Tough Claws') mod *= 1.3;
+    if ((ab === 'Iron Fist')) mod *= 1.2;
+    const stabFinal = (ab === 'Adaptability' && stab === 1.5) ? 2 : stab;
 
     // base damage (before random roll)
     const base = Math.floor(Math.floor((Math.floor((2 * L) / 5 + 2) * power * A) / D) / 50) + 2;
@@ -110,8 +123,27 @@ window.VIEWS = window.VIEWS || {};
     };
   }
 
-  const ITEMS = ['None', 'Life Orb', 'Choice (Atk/SpA)', 'Type Booster'];
-  const ABILITIES = ['None', 'Adaptability'];
+  // Type-boosting held items (item name -> the type it boosts by 20%).
+  const TYPE_BOOST_ITEMS = {
+    'Charcoal': 'FIRE', 'Mystic Water': 'WATER', 'Magnet': 'ELECTRIC', 'Miracle Seed': 'GRASS',
+    'Never-Melt Ice': 'ICE', 'Black Belt': 'FIGHTING', 'Poison Barb': 'POISON', 'Soft Sand': 'GROUND',
+    'Sharp Beak': 'FLYING', 'Twisted Spoon': 'PSYCHIC', 'Silver Powder': 'BUG', 'Hard Stone': 'ROCK',
+    'Spell Tag': 'GHOST', 'Dragon Fang': 'DRAGON', 'Black Glasses': 'DARK', 'Metal Coat': 'STEEL',
+    'Fairy Feather': 'FAIRY', 'Silk Scarf': 'NORMAL',
+  };
+
+  // All selectable held items (Battle Items pocket = held items like Life Orb, Choice Band, Leftovers).
+  const ITEMS = ['None'].concat(
+    (window.VSE_ITEMS || []).filter(i => i.cat === 'Battle Items').map(i => i.name).sort()
+  );
+  // Abilities available to a given Pokémon (its normal + hidden abilities).
+  function abilitiesFor(dex) {
+    const m = (window.VSEDEX.byDex[String(dex).padStart(3, '0')] || window.VSEDEX.byDex[dex]);
+    if (!m) return ['None'];
+    const list = ['None', ...(m.abilities || [])];
+    if (m.hidden) list.push(m.hidden);
+    return Array.from(new Set(list));
+  }
 
   // ---- Mon picker (compact) ----
   function MonPicker({ value, onChange, label, accent }) {
@@ -184,7 +216,7 @@ window.VIEWS = window.VIEWS || {};
           </Field>
           <Field label="ABILITY">
             <select value={f.ability} onChange={e => set({ ...f, ability: e.target.value })} style={selStyle}>
-              {ABILITIES.map(n => <option key={n} value={n} style={{ background: '#0f0b04' }}>{n}</option>)}
+              {abilitiesFor(f.dex).map(n => <option key={n} value={n} style={{ background: '#0f0b04' }}>{n}</option>)}
             </select>
           </Field>
         </div>
