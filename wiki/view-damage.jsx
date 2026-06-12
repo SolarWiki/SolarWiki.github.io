@@ -149,17 +149,29 @@ window.VIEWS = window.VIEWS || {};
   function MonPicker({ value, onChange, label, accent }) {
     const [open, setOpen] = React.useState(false);
     const [q, setQ] = React.useState('');
-    const mon = byDex(value);
+    const mon = value ? byDex(value) : null;
     const list = DEX.filter(d => !d.undiscovered && (!q.trim() || d.name.toLowerCase().includes(q.trim().toLowerCase()) || d.dex.includes(q.trim())));
     return (
       <div style={{ position: 'relative' }}>
         <button onClick={() => setOpen(o => !o)} style={{ cursor: 'pointer', width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12, borderRadius: 12, background: '#0f0b04', border: `1px solid ${accent}55` }}>
-          <SpriteSlot dex={mon.dex} name={mon.name} size={52} accent={accent} />
-          <div style={{ textAlign: 'left', flex: 1 }}>
-            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: '#7a6c4a' }}>{label}</div>
-            <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 18, color: '#fff' }}>{mon.name}</div>
-            <div style={{ display: 'flex', gap: 4, marginTop: 3 }}>{mon.types.map(t => <TypePill key={t} t={t} sm />)}</div>
-          </div>
+          {mon ? (
+            <React.Fragment>
+              <SpriteSlot dex={mon.dex} name={mon.name} size={52} accent={accent} />
+              <div style={{ textAlign: 'left', flex: 1 }}>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: '#7a6c4a' }}>{label}</div>
+                <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 18, color: '#fff' }}>{mon.name}</div>
+                <div style={{ display: 'flex', gap: 4, marginTop: 3 }}>{mon.types.map(t => <TypePill key={t} t={t} sm />)}</div>
+              </div>
+            </React.Fragment>
+          ) : (
+            <React.Fragment>
+              <div style={{ width: 52, height: 52, borderRadius: 10, border: `1.5px dashed ${accent}66`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: `${accent}99`, fontSize: 24, flex: '0 0 auto' }}>+</div>
+              <div style={{ textAlign: 'left', flex: 1 }}>
+                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: '#7a6c4a' }}>{label}</div>
+                <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 18, color: '#8a7d63' }}>Choose a Pokémon</div>
+              </div>
+            </React.Fragment>
+          )}
           <span style={{ color: '#7a6c4a', fontSize: 12 }}>▾</span>
         </button>
         {open && (
@@ -198,8 +210,12 @@ window.VIEWS = window.VIEWS || {};
     return (
       <div style={{ padding: 16, borderRadius: 16, background: 'radial-gradient(ellipse at 30% 0%, #14100a, #0c0a05 75%)', border: `1px solid ${accent}44` }}>
         <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 1, color: accent, marginBottom: 12 }}>{role}</div>
-        <MonPicker value={f.dex} onChange={dex => set({ ...defaultFighter(dex), level: f.level })} label="POKÉMON" accent={accent} />
+        <MonPicker value={f ? f.dex : null} onChange={dex => set({ ...defaultFighter(dex), level: f ? f.level : 50 })} label="POKÉMON" accent={accent} />
 
+        {!f ? (
+          <div style={{ marginTop: 14, padding: '18px 12px', textAlign: 'center', fontFamily: "'Outfit', sans-serif", fontSize: 13, color: '#7a6c4a' }}>Choose a Pokémon to set its stats.</div>
+        ) : (
+        <React.Fragment>
         <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
           <Field label="LEVEL">
             <input type="number" min={1} max={100} value={f.level} onChange={e => set({ ...f, level: Math.max(1, Math.min(100, +e.target.value || 1)) })} style={numStyle} />
@@ -236,13 +252,15 @@ window.VIEWS = window.VIEWS || {};
             ))}
           </div>
         )}
+        </React.Fragment>
+        )}
       </div>
     );
   }
 
   window.VIEWS.Damage = function Damage() {
-    const [atkr, setAtkr] = React.useState(() => defaultFighter('012'));
-    const [defr, setDefr] = React.useState(() => defaultFighter('040'));
+    const [atkr, setAtkr] = React.useState(null);
+    const [defr, setDefr] = React.useState(null);
     const [moveName, setMoveName] = React.useState('');
     const [moveQ, setMoveQ] = React.useState('');
 
@@ -250,6 +268,7 @@ window.VIEWS = window.VIEWS || {};
     // SE stores learnsets in window.VSE_LEARN keyed by zero-padded dex; level/tutor are
     // internal UPPERCASE names, tms are display names — byMove() normalizes either.
     const learn = React.useMemo(() => {
+      if (!atkr) return [];
       const L = window.VSE_LEARN || {};
       const key = String(atkr.dex).padStart(3, '0');
       const entry = L[key] || L[atkr.dex] || {};
@@ -267,10 +286,10 @@ window.VIEWS = window.VIEWS || {};
         }
       });
       return list.sort((a, b) => a.name.localeCompare(b.name));
-    }, [atkr.dex]);
+    }, [atkr && atkr.dex]);
 
     const move = moveName ? byMove(moveName) : null;
-    const result = move ? calcDamage(atkr, defr, move) : null;
+    const result = (move && atkr && defr) ? calcDamage(atkr, defr, move) : null;
 
     const filteredMoves = learn.filter(mv => !moveQ.trim() || mv.name.toLowerCase().includes(moveQ.trim().toLowerCase()));
 
@@ -284,6 +303,9 @@ window.VIEWS = window.VIEWS || {};
         </div>
 
         {/* move picker */}
+        {!atkr ? (
+          <div style={{ padding: 28, borderRadius: 16, background: '#0c0a05', border: '1px solid #241d10', marginBottom: 20, textAlign: 'center', fontFamily: "'Outfit', sans-serif", fontSize: 15, color: '#7a6c4a' }}>Choose an attacker above to pick a move.</div>
+        ) : (
         <div style={{ padding: 16, borderRadius: 16, background: '#0c0a05', border: '1px solid #241d10', marginBottom: 20 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 1, color: '#8a5cff', marginBottom: 12 }}>{atkr.mon.name.toUpperCase()}'S MOVE</div>
           <input value={moveQ} onChange={e => setMoveQ(e.target.value)} placeholder="Filter moves…" spellCheck={false}
@@ -304,6 +326,7 @@ window.VIEWS = window.VIEWS || {};
             </div>
           )}
         </div>
+        )}
 
         {/* result */}
         <ResultPanel atkr={atkr} defr={defr} move={move} result={result} />
@@ -312,9 +335,12 @@ window.VIEWS = window.VIEWS || {};
   };
 
   function ResultPanel({ atkr, defr, move, result }) {
-    if (!move) return (
-      <div style={{ padding: 40, borderRadius: 16, background: 'radial-gradient(circle at 50% 0%, #14100a, #0a0818 70%)', border: '1px solid #241d10', textAlign: 'center', fontFamily: "'Outfit', sans-serif", fontSize: 15, color: '#7a6c4a' }}>Pick a move above to calculate damage.</div>
-    );
+    if (!atkr || !defr || !move) {
+      const msg = !atkr || !defr ? 'Choose both an attacker and a defender to calculate damage.' : 'Pick a move above to calculate damage.';
+      return (
+        <div style={{ padding: 40, borderRadius: 16, background: 'radial-gradient(circle at 50% 0%, #14100a, #0a0818 70%)', border: '1px solid #241d10', textAlign: 'center', fontFamily: "'Outfit', sans-serif", fontSize: 15, color: '#7a6c4a' }}>{msg}</div>
+      );
+    }
     if (!result) return null;
     const noEffect = result.typeMult === 0;
     const effColor = result.typeMult === 0 ? '#a07bff' : result.typeMult >= 2 ? '#5fd13c' : result.typeMult <= 0.5 ? '#ff8f5c' : '#cbbd9f';
