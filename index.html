@@ -139,9 +139,9 @@
 
         {content}
 
-        <footer style={{ marginTop: 48, paddingTop: 22, borderTop: '1px solid #1c1609', color: '#6a5d42', fontFamily: "'Space Mono', monospace", fontSize: 12, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-          <span>Pokémon Solar Eclipse — Pokédex demo · Brought to you by Vaereth</span>
-          <span>Data generated from Solar_Eclipse_Docs v1.9.0 · {window.VSEDEX.DEX.length} entries</span>
+        <footer style={{ marginTop: 48, paddingTop: 22, borderTop: '1px solid #1c1609', color: '#6a5d42', fontFamily: "'Space Mono', monospace", fontSize: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <span>Pokémon Solar Eclipse · Data from Solar_Eclipse_Docs v1.9.0 · {window.VSEDEX.DEX.length} entries</span>
+          <span>Made by <a href="https://vaereth.github.io/Portfolio/" target="_blank" rel="noopener noreferrer" style={{ color: '#ffb347', fontWeight: 700, textDecoration: 'none', textShadow: '0 0 12px #ffb34755' }} onMouseEnter={e => { e.currentTarget.style.textShadow = '0 0 18px #ffb347aa'; e.currentTarget.style.textDecoration = 'underline'; }} onMouseLeave={e => { e.currentTarget.style.textShadow = '0 0 12px #ffb34755'; e.currentTarget.style.textDecoration = 'none'; }}>Vaereth</a></span>
         </footer>
       </div>
     );
