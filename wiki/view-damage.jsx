@@ -267,24 +267,19 @@ window.VIEWS = window.VIEWS || {};
     // attacker's learnable moves (level + tm + tutor + egg), de-duped, that deal damage.
     // SE stores learnsets in window.VSE_LEARN keyed by zero-padded dex; level/tutor are
     // internal UPPERCASE names, tms are display names — byMove() normalizes either.
+    // Damage calc only: any Pokémon may be assigned ANY damaging move in the game
+    // (a late-game mechanic lets you teach any move). This intentionally ignores the
+    // species learnset here — the team builder and detail pages keep real learnsets.
     const learn = React.useMemo(() => {
       if (!atkr) return [];
-      const L = window.VSE_LEARN || {};
-      const key = String(atkr.dex).padStart(3, '0');
-      const entry = L[key] || L[atkr.dex] || {};
-      const names = new Set();
-      (entry.level || []).forEach(pair => names.add(Array.isArray(pair) ? pair[1] : pair));
-      (entry.tms || []).forEach(n => names.add(n));
-      (entry.tutor || []).forEach(n => names.add(n));
-      (entry.egg || []).forEach(n => names.add(n));
+      const all = (window.VGAME && window.VGAME.MOVES) || window.VSE_MOVES || [];
       const list = [];
       const seen = new Set();
-      names.forEach(n => {
-        const mv = byMove(n);
+      for (const mv of all) {
         if (mv && mv.cls !== 'Status' && typeof mv.pow === 'number' && !seen.has(mv.name)) {
           seen.add(mv.name); list.push(mv);
         }
-      });
+      }
       return list.sort((a, b) => a.name.localeCompare(b.name));
     }, [atkr && atkr.dex]);
 
