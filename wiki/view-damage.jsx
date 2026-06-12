@@ -263,25 +263,39 @@ window.VIEWS = window.VIEWS || {};
     const [defr, setDefr] = React.useState(null);
     const [moveName, setMoveName] = React.useState('');
     const [moveQ, setMoveQ] = React.useState('');
+    const [showAll, setShowAll] = React.useState(false);
 
-    // attacker's learnable moves (level + tm + tutor + egg), de-duped, that deal damage.
-    // SE stores learnsets in window.VSE_LEARN keyed by zero-padded dex; level/tutor are
-    // internal UPPERCASE names, tms are display names — byMove() normalizes either.
-    // Damage calc only: any Pokémon may be assigned ANY damaging move in the game
-    // (a late-game mechanic lets you teach any move). This intentionally ignores the
-    // species learnset here — the team builder and detail pages keep real learnsets.
+    // Move list. Default = the attacker's real learnset (level + tm + tutor + egg).
+    // Toggle "show all moves" to allow assigning ANY damaging move in the game (a
+    // late-game mechanic lets you teach any move). Team builder / detail pages keep
+    // real learnsets regardless. SE learnsets live in window.VSE_LEARN keyed by
+    // zero-padded dex; level/tutor are internal UPPERCASE names, tms are display
+    // names — byMove() normalizes either.
     const learn = React.useMemo(() => {
       if (!atkr) return [];
-      const all = (window.VGAME && window.VGAME.MOVES) || window.VSE_MOVES || [];
-      const list = [];
       const seen = new Set();
-      for (const mv of all) {
+      const list = [];
+      const add = (mv) => {
         if (mv && mv.cls !== 'Status' && typeof mv.pow === 'number' && !seen.has(mv.name)) {
           seen.add(mv.name); list.push(mv);
         }
+      };
+      if (showAll) {
+        const all = (window.VGAME && window.VGAME.MOVES) || window.VSE_MOVES || [];
+        for (const mv of all) add(mv);
+      } else {
+        const L = window.VSE_LEARN || {};
+        const key = String(atkr.dex).padStart(3, '0');
+        const entry = L[key] || L[atkr.dex] || {};
+        const names = new Set();
+        (entry.level || []).forEach(pair => names.add(Array.isArray(pair) ? pair[1] : pair));
+        (entry.tms || []).forEach(n => names.add(n));
+        (entry.tutor || []).forEach(n => names.add(n));
+        (entry.egg || []).forEach(n => names.add(n));
+        names.forEach(n => add(byMove(n)));
       }
       return list.sort((a, b) => a.name.localeCompare(b.name));
-    }, [atkr && atkr.dex]);
+    }, [atkr && atkr.dex, showAll]);
 
     const move = moveName ? byMove(moveName) : null;
     const result = (move && atkr && defr) ? calcDamage(atkr, defr, move) : null;
@@ -302,7 +316,15 @@ window.VIEWS = window.VIEWS || {};
           <div style={{ padding: 28, borderRadius: 16, background: '#0c0a05', border: '1px solid #241d10', marginBottom: 20, textAlign: 'center', fontFamily: "'Outfit', sans-serif", fontSize: 15, color: '#7a6c4a' }}>Choose an attacker above to pick a move.</div>
         ) : (
         <div style={{ padding: 16, borderRadius: 16, background: '#0c0a05', border: '1px solid #241d10', marginBottom: 20 }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 1, color: '#8a5cff', marginBottom: 12 }}>{atkr.mon.name.toUpperCase()}'S MOVE</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 1, color: '#8a5cff' }}>{atkr.mon.name.toUpperCase()}'S MOVE</div>
+            <button onClick={() => setShowAll(s => !s)} title="Toggle all moves" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 10px 5px 12px', borderRadius: 999, background: showAll ? '#2a1c08' : '#0f0b04', border: `1px solid ${showAll ? '#ffb347' : '#2a2110'}` }}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 0.5, color: showAll ? '#ffb347' : '#7a6c4a', textTransform: 'uppercase' }}>{showAll ? 'All moves' : 'Learnable'}</span>
+              <span style={{ position: 'relative', width: 30, height: 16, borderRadius: 999, background: showAll ? '#ffb347' : '#2a2110', transition: 'background .15s' }}>
+                <span style={{ position: 'absolute', top: 2, left: showAll ? 16 : 2, width: 12, height: 12, borderRadius: '50%', background: showAll ? '#1a1206' : '#7a6c4a', transition: 'left .15s' }} />
+              </span>
+            </button>
+          </div>
           <input value={moveQ} onChange={e => setMoveQ(e.target.value)} placeholder="Filter moves…" spellCheck={false}
             style={{ width: '100%', maxWidth: 320, padding: '8px 12px', borderRadius: 8, background: '#0f0b04', border: '1px solid #2a2110', color: '#ece3d2', fontFamily: "'Outfit', sans-serif", fontSize: 14, outline: 'none', marginBottom: 12 }} />
           {filteredMoves.length === 0 ? <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: '#7a6c4a' }}>No damaging moves match.</div> : (
