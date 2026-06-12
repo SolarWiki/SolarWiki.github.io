@@ -119,16 +119,17 @@ window.VIEWS = window.VIEWS || {};
     const uniqueSpecies = new Set();
     area.groups.forEach(g => g.enc.forEach(e => uniqueSpecies.add(e.n)));
     const trainers = area.trainers || [];
+    const bosses = area.bosses || [];
+    const bits = [];
+    if (totalEnc > 0) bits.push(`${uniqueSpecies.size} species · ${totalEnc} encounter${totalEnc === 1 ? '' : 's'}`);
+    if (bosses.length > 0) bits.push(`${bosses.length} boss battle${bosses.length === 1 ? '' : 's'}`);
+    if (trainers.length > 0) bits.push(`${trainers.length} trainer${trainers.length === 1 ? '' : 's'}`);
     return (
       <div>
         <div style={{ marginBottom: 22 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: 1, color: '#ffb347', marginBottom: 6, textTransform: 'uppercase' }}>Location</div>
           <h2 style={{ margin: 0, fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 34, lineHeight: 1.05, color: '#fff', textShadow: '0 0 22px #ffb34744' }}>{area.name}</h2>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: '#8a7d63', marginTop: 8 }}>
-            {totalEnc > 0 ? `${uniqueSpecies.size} species · ${totalEnc} encounter${totalEnc === 1 ? '' : 's'}` : ''}
-            {totalEnc > 0 && trainers.length > 0 ? ' · ' : ''}
-            {trainers.length > 0 ? `${trainers.length} trainer${trainers.length === 1 ? '' : 's'}` : ''}
-          </div>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: '#8a7d63', marginTop: 8 }}>{bits.join(' · ')}</div>
         </div>
 
         {area.groups.map((g, i) => <GroupBlock key={i} g={g} />)}
@@ -150,6 +151,19 @@ window.VIEWS = window.VIEWS || {};
           </div>
         )}
 
+        {bosses.length > 0 && (
+          <div style={{ marginTop: 8, paddingTop: 18, borderTop: '1px solid #1c1609' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ffb347', boxShadow: '0 0 10px #ffb347' }} />
+              <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, letterSpacing: 1.5, color: '#ffb347', textTransform: 'uppercase' }}>Boss Battles</span>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: '#6a5d42' }}>{bosses.length}</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {bosses.map((b, i) => <BossCard key={b.type + (b.locLabel||"") + i} b={b} />)}
+            </div>
+          </div>
+        )}
+
         {trainers.length > 0 && (
           <div style={{ marginTop: 8, paddingTop: 18, borderTop: '1px solid #1c1609' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
@@ -158,12 +172,68 @@ window.VIEWS = window.VIEWS || {};
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: '#6a5d42' }}>{trainers.length}</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {trainers.map((t, i) => <TrainerCard key={i} t={t} />)}
+              {trainers.map((t, i) => <TrainerCard key={t.cls + t.name + i} t={t} />)}
             </div>
           </div>
         )}
       </div>
     );
+  }
+
+  // Trainer/boss sprite: try local trainers/<file>.png first, fall back to remote URL.
+  function TrainerSprite({ file, url, size = 46, ring = '#ff8f5c' }) {
+    const [src, setSrc] = React.useState(file ? `trainers/${file}.png` : (url || null));
+    const [failed, setFailed] = React.useState(false);
+    React.useEffect(() => { setSrc(file ? `trainers/${file}.png` : (url || null)); setFailed(false); }, [file, url]);
+    if (!src || failed) {
+      return (
+        <div style={{ width: size, height: size, flex: '0 0 auto', borderRadius: 10, border: `1.5px solid ${ring}55`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0d0a05', color: `${ring}aa`, fontFamily: "'Cinzel', serif", fontWeight: 700, fontSize: size * 0.4 }}>
+          ⚔
+        </div>
+      );
+    }
+    return (
+      <div style={{ width: size, height: size, flex: '0 0 auto', borderRadius: 10, overflow: 'hidden', background: '#0d0a05', border: `1px solid ${ring}44`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated' }}
+          onError={() => { if (file && url && src !== url) setSrc(url); else setFailed(true); }} />
+      </div>
+    );
+  }
+
+  function BossCard({ b }) {
+    const [enh, setEnh] = React.useState(false);
+    const team = enh ? (b.enhanced && b.enhanced.length ? b.enhanced : b.normal) : b.normal;
+    const hasEnh = b.enhanced && b.enhanced.length > 0;
+    const CLASS_COLOR = { 'Rival': '#ffb347', 'Gym Leader': '#ffd23c', 'Team Sol': '#ff5a7a' };
+    const accent = CLASS_COLOR[b.cls] || '#ffb347';
+    return (
+      <div style={{ padding: 15, borderRadius: 14, background: `radial-gradient(ellipse at 18% 0%, ${accent}1a, #0d0a05 76%)`, border: `1px solid ${accent}55`, boxShadow: `0 0 22px ${accent}14` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
+          <TrainerSprite key={b.spriteFile || b.name} file={b.spriteFile} url={b.spriteUrl} size={52} ring={accent} />
+          <div style={{ flex: 1, minWidth: 120 }}>
+            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 1, color: accent, textTransform: 'uppercase' }}>{b.cls}</span>
+            <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 20, color: '#fff', textShadow: `0 0 16px ${accent}55` }}>{b.name}</div>
+            {b.locLabel && b.locLabel !== undefined && <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, color: '#8a7d63' }}>{b.locLabel}</div>}
+          </div>
+          {hasEnh && (
+            <button onClick={() => setEnh(e => !e)} title="Toggle enhanced team" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 12px', borderRadius: 999, background: enh ? '#2a1c08' : '#0f0b04', border: `1px solid ${enh ? accent : '#2a2110'}` }}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: enh ? accent : '#7a6c4a', textTransform: 'uppercase' }}>{enh ? 'Enhanced' : 'Normal'}</span>
+              <span style={{ position: 'relative', width: 28, height: 15, borderRadius: 999, background: enh ? accent : '#2a2110' }}>
+                <span style={{ position: 'absolute', top: 2, left: enh ? 15 : 2, width: 11, height: 11, borderRadius: '50%', background: enh ? '#1a1206' : '#7a6c4a', transition: 'left .15s' }} />
+              </span>
+            </button>
+          )}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
+          {team.map((m, i) => <TrainerMon key={i} m={{ d: m.dex || null, s: m.dex ? null : (window.VSE_SPECIES_SPRITE && window.VSE_SPECIES_SPRITE[m.sp]) || null, n: dispMon(m), lv: m.lv, nick: m.nick, item: m.item, mv: m.moves, ab: m.abil }} />)}
+        </div>
+      </div>
+    );
+  }
+
+  function dispMon(m) {
+    if (m.dex && byDex[m.dex]) return byDex[m.dex].name;
+    return String(m.sp || '').split('_')[0].toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
   }
 
   function TrainerCard({ t }) {
@@ -173,9 +243,12 @@ window.VIEWS = window.VIEWS || {};
     return (
       <div style={{ padding: 14, borderRadius: 14, background: 'radial-gradient(ellipse at 20% 0%, #1a1206, #0d0a05 78%)', border: '1px solid #2a1d0e' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-          <div>
-            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 1, color: '#ff8f5c', textTransform: 'uppercase' }}>{t.label}</span>
-            <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 19, color: '#fff' }}>{t.name}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+            <TrainerSprite key={t.sf || t.cls} file={t.sf} url={t.su} size={44} ring="#ff8f5c" />
+            <div>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 1, color: '#ff8f5c', textTransform: 'uppercase' }}>{t.label}</span>
+              <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 19, color: '#fff' }}>{t.name}</div>
+            </div>
           </div>
           {hasTiers && (
             <div style={{ display: 'flex', gap: 5 }}>
