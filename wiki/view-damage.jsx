@@ -246,13 +246,26 @@ window.VIEWS = window.VIEWS || {};
     const [moveName, setMoveName] = React.useState('');
     const [moveQ, setMoveQ] = React.useState('');
 
-    // attacker's learnable moves (level + tm + egg), de-duped, that deal damage
+    // attacker's learnable moves (level + tm + tutor + egg), de-duped, that deal damage.
+    // SE stores learnsets in window.VSE_LEARN keyed by zero-padded dex; level/tutor are
+    // internal UPPERCASE names, tms are display names — byMove() normalizes either.
     const learn = React.useMemo(() => {
+      const L = window.VSE_LEARN || {};
+      const key = String(atkr.dex).padStart(3, '0');
+      const entry = L[key] || L[atkr.dex] || {};
       const names = new Set();
-      const m = atkr.mon;
-      for (const arr of [m.levelMoves || [], m.tmMoves || [], m.eggMoves || []]) for (const mv of arr) names.add(mv.name || mv);
+      (entry.level || []).forEach(pair => names.add(Array.isArray(pair) ? pair[1] : pair));
+      (entry.tms || []).forEach(n => names.add(n));
+      (entry.tutor || []).forEach(n => names.add(n));
+      (entry.egg || []).forEach(n => names.add(n));
       const list = [];
-      names.forEach(n => { const mv = byMove(n); if (mv && mv.cls !== 'Status' && typeof mv.pow === 'number') list.push(mv); });
+      const seen = new Set();
+      names.forEach(n => {
+        const mv = byMove(n);
+        if (mv && mv.cls !== 'Status' && typeof mv.pow === 'number' && !seen.has(mv.name)) {
+          seen.add(mv.name); list.push(mv);
+        }
+      });
       return list.sort((a, b) => a.name.localeCompare(b.name));
     }, [atkr.dex]);
 
