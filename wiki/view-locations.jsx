@@ -67,7 +67,7 @@ window.VIEWS = window.VIEWS || {};
         }}
         onMouseEnter={ev => { if (clickable) ev.currentTarget.style.borderColor = '#ffb34766'; }}
         onMouseLeave={ev => { ev.currentTarget.style.borderColor = '#241d10'; }}>
-        <SpriteSlot dex={e.d} name={e.n} size={44} />
+        <SpriteSlot dex={e.d} name={e.n} size={60} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14.5, fontWeight: 600, color: '#ece3d2' }}>{e.n}</div>
           <div style={{ display: 'flex', gap: 5, marginTop: 3 }}>{mon && mon.types.map(t => <TypePill key={t} t={t} sm />)}</div>
@@ -277,7 +277,7 @@ window.VIEWS = window.VIEWS || {};
     return (
       <div onClick={() => clickable && go('detail', m.d)} title={m.mv ? m.mv.map(mvName).join(', ') : ''}
         style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '7px 9px', borderRadius: 10, background: '#100c05', border: '1px solid #241d10', cursor: clickable ? 'pointer' : 'default' }}>
-        <SpriteSlot dex={spriteKey} name={m.n} size={38} />
+        <SpriteSlot dex={spriteKey} name={m.n} size={44} />
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
             <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600, color: '#ece3d2', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.n}</span>
