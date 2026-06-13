@@ -7,7 +7,7 @@ window.VIEWS = window.VIEWS || {};
   const bstOf = s => Object.values(s).reduce((a, b) => a + b, 0);
 
   // ---- Stat + abilities block --------------------------------------------
-  function StatBlock({ entry, vanilla }) {
+  function StatBlock({ entry, vanilla, d, accent, vi }) {
     const [compare, setCompare] = React.useState(true);
     const showCmp = vanilla && compare;
     const eclipseBst = bstOf(entry.stats);
@@ -39,6 +39,7 @@ window.VIEWS = window.VIEWS || {};
             <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 16, color: '#ffb347', fontWeight: 700 }}>{eclipseBst}</span>
           </span>
         </div>
+        {d && <ShinyShowcase d={d} accent={accent} vi={vi} />}
         <div style={{ marginTop: 16 }}>
           <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 600, color: '#8a7d63', marginBottom: 8, letterSpacing: 1, textTransform: 'uppercase' }}>Abilities</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -276,10 +277,9 @@ window.VIEWS = window.VIEWS || {};
                 ))}
               </div>
             )}
-            <StatBlock entry={cur} vanilla={vi === 0 ? (window.VSE_VANILLA && window.VSE_VANILLA[d.dex]) : null} />
+            <StatBlock entry={cur} vanilla={vi === 0 ? (window.VSE_VANILLA && window.VSE_VANILLA[d.dex]) : null} d={d} accent={accent} vi={vi} />
             {vi === 0 && <EvoFamily d={d} />}
             {vi === 0 && <Learnset d={d} />}
-            <ShinyShowcase d={d} accent={accent} vi={vi} />
           </div>
         </div>
       </div>
