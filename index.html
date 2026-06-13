@@ -2,9 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Pokémon Solar Eclipse — Wiki</title>
 <meta name="theme-color" content="#0a0805" />
+<link rel="manifest" href="manifest.json" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Solar Eclipse" />
+<link rel="apple-touch-icon" href="icons/icon-180.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
 <link href="fonts.css" rel="stylesheet" />
 <style>
   html, body { margin: 0; padding: 0; }
@@ -153,6 +160,18 @@
   }
 
   ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+<script>
+  // Register the service worker for offline support + installable app (PWA).
+  // Only over http(s) — not file:// — to avoid console errors during local preview.
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function (err) {
+        console.warn('Service worker registration failed:', err);
+      });
+    });
+  }
 </script>
 </body>
 </html>

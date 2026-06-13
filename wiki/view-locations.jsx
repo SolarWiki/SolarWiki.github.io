@@ -224,8 +224,8 @@ window.VIEWS = window.VIEWS || {};
             </button>
           )}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
-          {team.map((m, i) => <TrainerMon key={i} m={{ d: m.dex || null, s: m.dex ? null : (window.VSE_SPECIES_SPRITE && window.VSE_SPECIES_SPRITE[m.sp]) || null, n: dispMon(m), lv: m.lv, nick: m.nick, item: m.item, mv: m.moves, ab: m.abil }} />)}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 8 }}>
+          {team.map((m, i) => <TrainerMon key={i} m={{ d: m.dex || null, s: m.dex ? null : (window.VSE_SPECIES_SPRITE && window.VSE_SPECIES_SPRITE[m.sp]) || null, n: dispMon(m), lv: m.lv, nick: m.nick, item: m.item, mv: m.moves, ab: m.abil, abN: m.abN }} />)}
         </div>
       </div>
     );
@@ -262,7 +262,7 @@ window.VIEWS = window.VIEWS || {};
             </div>
           )}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 8 }}>
           {team.map((m, i) => <TrainerMon key={i} m={m} />)}
         </div>
       </div>
@@ -274,9 +274,11 @@ window.VIEWS = window.VIEWS || {};
     const spriteKey = m.d || m.s; // dex number or natNNN key
     const types = mon ? mon.types : (window.VSE_SPECIES_INFO && window.VSE_SPECIES_INFO[normUp(m.n)] ? window.VSE_SPECIES_INFO[normUp(m.n)].types : []);
     const clickable = !!mon;
+    const abil = m.abN || null;
+    const moves = m.mv && m.mv.length ? m.mv.map(mvObj).filter(Boolean) : [];
     return (
-      <div onClick={() => clickable && go('detail', m.d)} title={m.mv ? m.mv.map(mvName).join(', ') : ''}
-        style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '7px 9px', borderRadius: 10, background: '#100c05', border: '1px solid #241d10', cursor: clickable ? 'pointer' : 'default' }}>
+      <div onClick={() => clickable && go('detail', m.d)}
+        style={{ display: 'flex', alignItems: 'flex-start', gap: 9, padding: '8px 10px', borderRadius: 10, background: '#100c05', border: '1px solid #241d10', cursor: clickable ? 'pointer' : 'default' }}>
         <SpriteSlot dex={spriteKey} name={m.n} size={44} />
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
@@ -284,13 +286,35 @@ window.VIEWS = window.VIEWS || {};
             <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: '#ffb347' }}>Lv{m.lv}</span>
           </div>
           {m.nick && <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10.5, color: '#9a8d6f', fontStyle: 'italic' }}>"{m.nick}"</div>}
-          <div style={{ display: 'flex', gap: 4, marginTop: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 4, marginTop: 3, alignItems: 'center', flexWrap: 'wrap' }}>
             {types.map(ty => <TypePill key={ty} t={ty} sm />)}
             {m.item && <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 8.5, color: '#ffd23c', border: '1px solid #ffd23c44', borderRadius: 4, padding: '1px 4px' }}>{itemName(m.item)}</span>}
           </div>
+          {abil && <div style={{ marginTop: 4, fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#c8a0ff' }}>{abil}</div>}
+          {moves.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 4 }}>
+              {moves.map((mv, i) => (
+                <span key={i} style={{
+                  fontFamily: "'Outfit', sans-serif", fontSize: 9.5, color: '#d8cdb6', lineHeight: 1.2,
+                  padding: '1px 6px', borderRadius: 5, background: '#0a0703',
+                  border: `1px solid ${TYPECOL(mv.type)}55`, borderLeft: `2px solid ${TYPECOL(mv.type)}`,
+                }}>{mv.name}</span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
+  }
+
+  function mvObj(internal) {
+    const mv = window.VGAME && window.VGAME.byMove ? window.VGAME.byMove(internal) : null;
+    if (mv) return { name: mv.name, type: mv.type };
+    return { name: titleish(internal), type: null };
+  }
+  function TYPECOL(t) {
+    const TY = window.VUI.TYPES || {};
+    return (t && TY[t] && TY[t].color) ? TY[t].color : '#7a6c4a';
   }
 
   function normUp(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
@@ -308,16 +332,56 @@ window.VIEWS = window.VIEWS || {};
   }
   function titleish(s) { return String(s || '').toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 
+  function useIsMobile(bp = 720) {
+    const [m, setM] = React.useState(typeof window !== 'undefined' ? window.innerWidth <= bp : false);
+    React.useEffect(() => {
+      const on = () => setM(window.innerWidth <= bp);
+      window.addEventListener('resize', on);
+      return () => window.removeEventListener('resize', on);
+    }, [bp]);
+    return m;
+  }
+
   window.VIEWS.Locations = function Locations() {
     const AREAS = window.VSE_LOCATIONS || [];
     const [sel, setSel] = React.useState(0);
     const [q, setQ] = React.useState('');
+    const isMobile = useIsMobile();
 
     const filtered = AREAS.map((a, i) => ({ a, i })).filter(({ a }) =>
       !q.trim() || a.name.toLowerCase().includes(q.trim().toLowerCase()) ||
       a.groups.some(g => g.enc.some(e => e.n.toLowerCase().includes(q.trim().toLowerCase())))
     );
     const area = AREAS[sel];
+
+    if (isMobile) {
+      return (
+        <div>
+          <PageHead kicker="WORLD MAP" title="Locations" sub="Every area in route order — wild encounters, items, trainers, and bosses." />
+          <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search area or Pokémon…" spellCheck={false}
+            style={{ width: '100%', padding: '11px 14px', borderRadius: 10, background: '#0f0b04', border: '1px solid #2a2110', color: '#ece3d2', fontFamily: "'Outfit', sans-serif", fontSize: 15, outline: 'none', marginBottom: 12, boxSizing: 'border-box' }} />
+          {/* horizontal area chips */}
+          <div style={{ display: 'flex', gap: 7, overflowX: 'auto', paddingBottom: 8, marginBottom: 16, WebkitOverflowScrolling: 'touch' }}>
+            {filtered.map(({ a, i }) => {
+              const active = i === sel;
+              return (
+                <button key={i} onClick={() => setSel(i)} style={{
+                  cursor: 'pointer', flex: '0 0 auto', whiteSpace: 'nowrap', padding: '8px 14px', borderRadius: 999,
+                  background: active ? 'linear-gradient(100deg, #2a1c08, #1a1206)' : '#0d0a05',
+                  border: `1px solid ${active ? '#ffb347' : '#1c1609'}`,
+                  fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: active ? 700 : 500,
+                  color: active ? '#ffd9a0' : '#cbbd9f',
+                }}>{a.name}</button>
+              );
+            })}
+            {filtered.length === 0 && <span style={{ color: '#7a6c4a', fontSize: 13, padding: 8 }}>No areas match.</span>}
+          </div>
+          <div style={{ padding: 16, borderRadius: 14, background: 'radial-gradient(ellipse at 30% 0%, #14100a, #0a0805 75%)', border: '1px solid #241d10' }}>
+            {area ? <AreaDetail area={area} /> : <div style={{ color: '#7a6c4a' }}>Select an area.</div>}
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div>
