@@ -237,7 +237,7 @@ window.VIEWS = window.VIEWS || {};
           </Field>
         </div>
 
-        <button onClick={() => setShowAdv(s => !s)} style={{ cursor: 'pointer', background: 'transparent', border: 'none', color: '#8a5cff', fontFamily: "'Outfit', sans-serif", fontSize: 12, marginTop: 4 }}>{showAdv ? '▾ hide IVs / EVs' : '▸ IVs / EVs'}</button>
+        <button onClick={() => setShowAdv(s => !s)} style={{ cursor: 'pointer', background: 'transparent', border: 'none', color: '#ffb347', fontFamily: "'Outfit', sans-serif", fontSize: 12, marginTop: 4 }}>{showAdv ? '▾ hide IVs / EVs' : '▸ IVs / EVs'}</button>
         {showAdv && (
           <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
             <div className="v-keeprow" style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr', gap: 8, alignItems: 'center', fontFamily: "'Space Mono', monospace", fontSize: 7, color: '#7a6c4a' }}>
@@ -245,7 +245,7 @@ window.VIEWS = window.VIEWS || {};
             </div>
             {STATS.map(s => (
               <div key={s} className="v-keeprow" style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr', gap: 8, alignItems: 'center' }}>
-                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: '#a89fce' }}>{s}</span>
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: '#9a8d6f' }}>{s}</span>
                 <input type="number" min={0} max={31} value={f.ivs[s]} onChange={e => set({ ...f, ivs: { ...f.ivs, [s]: Math.max(0, Math.min(31, +e.target.value || 0)) } })} style={{ ...numStyle, width: '100%' }} />
                 <input type="number" min={0} max={252} value={f.evs[s]} onChange={e => set({ ...f, evs: { ...f.evs, [s]: Math.max(0, Math.min(252, +e.target.value || 0)) } })} style={{ ...numStyle, width: '100%' }} />
               </div>
@@ -317,7 +317,7 @@ window.VIEWS = window.VIEWS || {};
         ) : (
         <div style={{ padding: 16, borderRadius: 16, background: '#0c0a05', border: '1px solid #241d10', marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
-            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 1, color: '#8a5cff' }}>{atkr.mon.name.toUpperCase()}'S MOVE</div>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 1, color: '#ffb347' }}>{atkr.mon.name.toUpperCase()}'S MOVE</div>
             <button onClick={() => setShowAll(s => !s)} title="Toggle all moves" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 10px 5px 12px', borderRadius: 999, background: showAll ? '#2a1c08' : '#0f0b04', border: `1px solid ${showAll ? '#ffb347' : '#2a2110'}` }}>
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 0.5, color: showAll ? '#ffb347' : '#7a6c4a', textTransform: 'uppercase' }}>{showAll ? 'All moves' : 'Learnable'}</span>
               <span style={{ position: 'relative', width: 30, height: 16, borderRadius: 999, background: showAll ? '#ffb347' : '#2a2110', transition: 'background .15s' }}>
@@ -331,9 +331,9 @@ window.VIEWS = window.VIEWS || {};
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
               {filteredMoves.map(mv => {
                 const sel = mv.name === moveName;
-                const T = TYPES[mv.type] || { glow: '#8a5cff', bg: '#222', fg: '#fff', name: mv.type };
+                const T = TYPES[mv.type] || { glow: '#ffb347', bg: '#222', fg: '#fff', name: mv.type };
                 return (
-                  <button key={mv.name} onClick={() => setMoveName(mv.name)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 12px', borderRadius: 9, background: sel ? T.bg : '#15112a', border: `1.5px solid ${sel ? T.glow : '#241d10'}`, boxShadow: sel ? `0 0 12px ${T.glow}66` : 'none' }}>
+                  <button key={mv.name} onClick={() => setMoveName(mv.name)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 12px', borderRadius: 9, background: sel ? T.bg : '#160f06', border: `1.5px solid ${sel ? T.glow : '#241d10'}`, boxShadow: sel ? `0 0 12px ${T.glow}66` : 'none' }}>
                     <span style={{ width: 9, height: 9, borderRadius: '50%', background: T.glow }} />
                     <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600, color: sel ? '#fff' : '#cbbd9f' }}>{mv.name}</span>
                     <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: sel ? '#fff' : '#8a7d63' }}>{mv.cls === 'Physical' ? '⚔' : '✦'} {mv.pow}</span>
@@ -355,16 +355,16 @@ window.VIEWS = window.VIEWS || {};
     if (!atkr || !defr || !move) {
       const msg = !atkr || !defr ? 'Choose both an attacker and a defender to calculate damage.' : 'Pick a move above to calculate damage.';
       return (
-        <div style={{ padding: 40, borderRadius: 16, background: 'radial-gradient(circle at 50% 0%, #14100a, #0a0818 70%)', border: '1px solid #241d10', textAlign: 'center', fontFamily: "'Outfit', sans-serif", fontSize: 15, color: '#7a6c4a' }}>{msg}</div>
+        <div style={{ padding: 40, borderRadius: 16, background: 'radial-gradient(circle at 50% 0%, #14100a, #0a0805 70%)', border: '1px solid #241d10', textAlign: 'center', fontFamily: "'Outfit', sans-serif", fontSize: 15, color: '#7a6c4a' }}>{msg}</div>
       );
     }
     if (!result) return null;
     const noEffect = result.typeMult === 0;
-    const effColor = result.typeMult === 0 ? '#a07bff' : result.typeMult >= 2 ? '#5fd13c' : result.typeMult <= 0.5 ? '#ff8f5c' : '#cbbd9f';
+    const effColor = result.typeMult === 0 ? '#ff8f5c' : result.typeMult >= 2 ? '#5fd13c' : result.typeMult <= 0.5 ? '#ff8f5c' : '#cbbd9f';
     const effLabel = result.typeMult === 0 ? 'No effect' : result.typeMult >= 4 ? 'Quad effective' : result.typeMult === 2 ? 'Super effective' : result.typeMult === 0.5 ? 'Not very effective' : result.typeMult === 0.25 ? 'Quarter damage' : 'Neutral';
     return (
-      <div style={{ padding: 24, borderRadius: 16, background: 'radial-gradient(ellipse at 50% 0%, #1a1438, #0a0818 70%)', border: '1px solid #2a2110' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 18, fontFamily: "'Outfit', sans-serif", fontSize: 15, color: '#bdb6dd' }}>
+      <div style={{ padding: 24, borderRadius: 16, background: 'radial-gradient(ellipse at 50% 0%, #1a1408, #0a0805 70%)', border: '1px solid #2a2110' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 18, fontFamily: "'Outfit', sans-serif", fontSize: 15, color: '#9a8d6f' }}>
           <strong style={{ color: '#ff8f5c' }}>{atkr.mon.name}</strong>
           <span>uses</span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 8, background: (TYPES[move.type] || {}).bg, border: `1px solid ${(TYPES[move.type] || {}).glow}` }}>
@@ -375,11 +375,11 @@ window.VIEWS = window.VIEWS || {};
         </div>
 
         {noEffect ? (
-          <div style={{ textAlign: 'center', fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 28, color: '#a07bff' }}>It doesn't affect {defr.mon.name}…</div>
+          <div style={{ textAlign: 'center', fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 28, color: '#ff8f5c' }}>It doesn't affect {defr.mon.name}…</div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 16 }}>
             <Stat label="DAMAGE" value={`${result.min}–${result.max}`} sub="HP" color="#fff" />
-            <Stat label="% OF HP" value={`${result.minPct.toFixed(1)}–${result.maxPct.toFixed(1)}%`} sub={`of ${result.hp} HP`} color="#b08fff" />
+            <Stat label="% OF HP" value={`${result.minPct.toFixed(1)}–${result.maxPct.toFixed(1)}%`} sub={`of ${result.hp} HP`} color="#ffd23c" />
             <Stat label="EFFECTIVENESS" value={`×${result.typeMult}`} sub={effLabel} color={effColor} />
             <Stat label="RESULT" value={result.koText} sub="" color={/OHKO|Guaranteed/.test(result.koText) ? '#5fd13c' : '#ffb347'} small />
           </div>
@@ -387,9 +387,9 @@ window.VIEWS = window.VIEWS || {};
 
         {!noEffect && (
           <div style={{ marginTop: 20 }}>
-            <div style={{ height: 22, borderRadius: 6, background: '#15112a', overflow: 'hidden', position: 'relative', border: '1px solid #2a2110' }}>
-              <div style={{ position: 'absolute', inset: 0, width: `${Math.min(100, result.minPct)}%`, background: 'linear-gradient(90deg, #6a4dd6, #b08fff)' }} />
-              <div style={{ position: 'absolute', inset: 0, width: `${Math.min(100, result.maxPct)}%`, background: 'linear-gradient(90deg, transparent, #b08fff44)', borderRight: result.maxPct < 100 ? '2px solid #ff8f5c' : 'none' }} />
+            <div style={{ height: 22, borderRadius: 6, background: '#160f06', overflow: 'hidden', position: 'relative', border: '1px solid #2a2110' }}>
+              <div style={{ position: 'absolute', inset: 0, width: `${Math.min(100, result.minPct)}%`, background: 'linear-gradient(90deg, #c47a1e, #ffd23c)' }} />
+              <div style={{ position: 'absolute', inset: 0, width: `${Math.min(100, result.maxPct)}%`, background: 'linear-gradient(90deg, transparent, #c47a1e44)', borderRight: result.maxPct < 100 ? '2px solid #ff8f5c' : 'none' }} />
             </div>
             <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: '#7a6c4a', marginTop: 6, textAlign: 'center' }}>Bar shows worst-case → best-case damage as a share of the defender's HP.</div>
           </div>

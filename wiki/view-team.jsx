@@ -287,11 +287,11 @@ window.VIEWS = window.VIEWS || {};
     const list = DEX.filter(d => !d.undiscovered && !exclude.includes(d.dex) &&
       (!q.trim() || d.name.toLowerCase().includes(q.trim().toLowerCase()) || d.dex.includes(q.trim())));
     return (
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(5,3,12,0.82)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '60px 20px', overflowY: 'auto' }}>
-        <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 760, background: 'radial-gradient(ellipse at 30% 0%, #14100a, #0a0818 70%)', border: '1px solid #2a2110', borderRadius: 18, padding: 22, boxShadow: '0 30px 80px #000a' }}>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(6,4,2,0.82)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '60px 20px', overflowY: 'auto' }}>
+        <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 760, background: 'radial-gradient(ellipse at 30% 0%, #14100a, #0a0805 70%)', border: '1px solid #2a2110', borderRadius: 18, padding: 22, boxShadow: '0 30px 80px #000a' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
             <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 24, color: '#fff' }}>Add a Pokémon</span>
-            <button onClick={onClose} style={{ marginLeft: 'auto', cursor: 'pointer', background: '#1a1238', border: '1px solid #3a2f6e', color: '#cbbd9f', borderRadius: 8, padding: '6px 12px', fontFamily: "'Outfit', sans-serif", fontSize: 13 }}>Close</button>
+            <button onClick={onClose} style={{ marginLeft: 'auto', cursor: 'pointer', background: '#1a1408', border: '1px solid #4a3a14', color: '#cbbd9f', borderRadius: 8, padding: '6px 12px', fontFamily: "'Outfit', sans-serif", fontSize: 13 }}>Close</button>
           </div>
           <input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="Search by name or №…" spellCheck={false}
             style={{ width: '100%', padding: '11px 15px', borderRadius: 10, background: '#0f0b04', border: '1px solid #2a2110', color: '#ece3d2', fontFamily: "'Outfit', sans-serif", fontSize: 15, outline: 'none', marginBottom: 16 }} />
@@ -299,7 +299,7 @@ window.VIEWS = window.VIEWS || {};
             {list.map(d => {
               const accent = TYPES[d.types[0]].glow;
               return (
-                <button key={d.dex} onClick={() => onPick(d.dex)} style={{ cursor: 'pointer', padding: 10, borderRadius: 12, background: '#0e0b1f', border: '1px solid #241d10', textAlign: 'center' }}>
+                <button key={d.dex} onClick={() => onPick(d.dex)} style={{ cursor: 'pointer', padding: 10, borderRadius: 12, background: '#100c06', border: '1px solid #241d10', textAlign: 'center' }}>
                   <SpriteSlot dex={d.dex} name={d.name} size={68} accent={accent} />
                   <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: '#7a6c4a', marginTop: 5 }}>No.{d.dex}</div>
                   <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 13, color: '#fff', lineHeight: 1.1 }}>{d.name}</div>
@@ -320,8 +320,8 @@ window.VIEWS = window.VIEWS || {};
     const toggle = (name) => setSel(s => s.includes(name) ? s.filter(x => x !== name) : (s.length < 4 ? [...s, name] : s));
     const shown = moves.filter(n => !q.trim() || n.toLowerCase().includes(q.trim().toLowerCase()));
     return (
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(5,3,12,0.82)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '50px 20px', overflowY: 'auto' }}>
-        <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 560, background: 'radial-gradient(ellipse at 30% 0%, #14100a, #0a0818 70%)', border: '1px solid #2a2110', borderRadius: 18, padding: 22 }}>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(6,4,2,0.82)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '50px 20px', overflowY: 'auto' }}>
+        <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 560, background: 'radial-gradient(ellipse at 30% 0%, #14100a, #0a0805 70%)', border: '1px solid #2a2110', borderRadius: 18, padding: 22 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
             <SpriteSlot dex={dex} name={mon ? mon.name : dex} size={40} accent={mon ? TYPES[mon.types[0]].glow : '#ffb347'} />
             <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 22, color: '#fff' }}>{mon ? mon.name : dex}</span>
@@ -335,7 +335,7 @@ window.VIEWS = window.VIEWS || {};
                 const on = sel.includes(name);
                 const dis = !on && sel.length >= 4;
                 return (
-                  <button key={name} onClick={() => toggle(name)} disabled={dis} style={{ cursor: dis ? 'not-allowed' : 'pointer', textAlign: 'left', padding: '8px 11px', borderRadius: 8, background: on ? '#ffb34733' : '#0f0b04', border: `1px solid ${on ? '#ffb347' : '#241d10'}`, color: on ? '#fff' : (dis ? '#4a4565' : '#cdc6e6'), fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: on ? 600 : 400 }}>
+                  <button key={name} onClick={() => toggle(name)} disabled={dis} style={{ cursor: dis ? 'not-allowed' : 'pointer', textAlign: 'left', padding: '8px 11px', borderRadius: 8, background: on ? '#ffb34733' : '#0f0b04', border: `1px solid ${on ? '#ffb347' : '#241d10'}`, color: on ? '#fff' : (dis ? '#5a4f33' : '#cbbd9f'), fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: on ? 600 : 400 }}>
                     {on ? '✓ ' : ''}{name}
                   </button>
                 );
@@ -343,7 +343,7 @@ window.VIEWS = window.VIEWS || {};
             </div>
           )}
           <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-            <button onClick={() => { onSave(sel); onClose(); }} style={{ cursor: 'pointer', flex: 1, padding: '11px', borderRadius: 10, background: 'linear-gradient(135deg, #4a3a9a, #2d2270)', border: '1px solid #6a52c0', color: '#fff', fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 700 }}>Save Moves</button>
+            <button onClick={() => { onSave(sel); onClose(); }} style={{ cursor: 'pointer', flex: 1, padding: '11px', borderRadius: 10, background: 'linear-gradient(135deg, #c47a1e, #8a5212)', border: '1px solid #ffb347', color: '#fff', fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 700 }}>Save Moves</button>
             <button onClick={onClose} style={{ cursor: 'pointer', padding: '11px 16px', borderRadius: 10, background: 'transparent', border: '1px solid #2a2110', color: '#8a7d63', fontFamily: "'Outfit', sans-serif", fontSize: 13 }}>Cancel</button>
           </div>
         </div>
@@ -386,7 +386,7 @@ window.VIEWS = window.VIEWS || {};
     const setIv = (k, v) => setIvs(i => ({ ...i, [k]: Math.max(0, Math.min(31, v | 0)) }));
 
     const natInfo = NAT[nature] || { up: null, down: null };
-    const statColor = (k) => natInfo.up === k ? '#7ee08a' : (natInfo.down === k ? '#ff8fa6' : '#cdc6e6');
+    const statColor = (k) => natInfo.up === k ? '#7ee08a' : (natInfo.down === k ? '#ff8fa6' : '#cbbd9f');
     const computed = (k) => {
       if (!mon || !VS.computeStat) return 0;
       return VS.computeStat(mon.stats[k], k, LEVEL, ivs[k] == null ? 31 : ivs[k], evs[k] || 0, nature);
@@ -395,8 +395,8 @@ window.VIEWS = window.VIEWS || {};
     const barMax = 230;
 
     return (
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(5,3,12,0.82)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '50px 20px', overflowY: 'auto' }}>
-        <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 560, background: 'radial-gradient(ellipse at 30% 0%, #14100a, #0a0818 70%)', border: '1px solid #2a2110', borderRadius: 18, padding: 22 }}>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(6,4,2,0.82)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '50px 20px', overflowY: 'auto' }}>
+        <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 560, background: 'radial-gradient(ellipse at 30% 0%, #14100a, #0a0805 70%)', border: '1px solid #2a2110', borderRadius: 18, padding: 22 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
             <SpriteSlot dex={dex} name={mon ? mon.name : dex} size={40} accent={mon ? TYPES[mon.types[0]].glow : '#ffb347'} />
             <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 22, color: '#fff' }}>{mon ? mon.name : dex}</span>
@@ -438,15 +438,15 @@ window.VIEWS = window.VIEWS || {};
               <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ width: 56, fontFamily: "'Outfit', sans-serif", fontSize: 12, color: statColor(k), fontWeight: 600 }}>{SLABEL[k]}</span>
                 <span style={{ width: 38, textAlign: 'right', fontFamily: "'Space Mono', monospace", fontSize: 14, color: '#fff' }}>{computed(k)}</span>
-                <div style={{ flex: 1, height: 8, borderRadius: 4, background: '#1a1533', overflow: 'hidden' }}>
-                  <div style={{ width: Math.min(100, Math.round((computed(k) / barMax) * 100)) + '%', height: '100%', background: 'linear-gradient(90deg,#5a2db3,#ffb347)' }} />
+                <div style={{ flex: 1, height: 8, borderRadius: 4, background: '#1a1408', overflow: 'hidden' }}>
+                  <div style={{ width: Math.min(100, Math.round((computed(k) / barMax) * 100)) + '%', height: '100%', background: 'linear-gradient(90deg,#c47a1e,#ffb347)' }} />
                 </div>
                 <input type="range" min="0" max="252" step="4" value={evs[k] || 0} onChange={e => setEv(k, +e.target.value)}
                   style={{ width: 96 }} title="EVs" />
                 <span style={{ width: 30, textAlign: 'right', fontFamily: "'Space Mono', monospace", fontSize: 11, color: '#8a7d63' }}>{evs[k] || 0}</span>
                 <input type="number" min="0" max="31" value={ivs[k] == null ? 31 : ivs[k]} onChange={e => setIv(k, +e.target.value)}
                   title="IV (0-31)"
-                  style={{ width: 42, padding: '4px 5px', borderRadius: 6, background: '#0f0b04', border: '1px solid #2a2110', color: '#cdc6e6', fontFamily: "'Space Mono', monospace", fontSize: 12, textAlign: 'center', outline: 'none' }} />
+                  style={{ width: 42, padding: '4px 5px', borderRadius: 6, background: '#0f0b04', border: '1px solid #2a2110', color: '#cbbd9f', fontFamily: "'Space Mono', monospace", fontSize: 12, textAlign: 'center', outline: 'none' }} />
               </div>
             ))}
           </div>
@@ -457,7 +457,7 @@ window.VIEWS = window.VIEWS || {};
           <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
             <button onClick={() => { setEvs(VS.freshEVs ? VS.freshEVs() : {}); setIvs(VS.maxIVs ? VS.maxIVs() : {}); setNature('Hardy'); setAbility(abilPool[0] || null); }}
               style={{ cursor: 'pointer', padding: '11px 14px', borderRadius: 10, background: 'transparent', border: '1px solid #2a2110', color: '#8a7d63', fontFamily: "'Outfit', sans-serif", fontSize: 13 }}>Reset</button>
-            <button onClick={() => { onSave({ evs, ivs, nature, ability }); onClose(); }} style={{ cursor: 'pointer', flex: 1, padding: '11px', borderRadius: 10, background: 'linear-gradient(135deg, #4a3a9a, #2d2270)', border: '1px solid #6a52c0', color: '#fff', fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 700 }}>Save</button>
+            <button onClick={() => { onSave({ evs, ivs, nature, ability }); onClose(); }} style={{ cursor: 'pointer', flex: 1, padding: '11px', borderRadius: 10, background: 'linear-gradient(135deg, #c47a1e, #8a5212)', border: '1px solid #ffb347', color: '#fff', fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 700 }}>Save</button>
             <button onClick={onClose} style={{ cursor: 'pointer', padding: '11px 16px', borderRadius: 10, background: 'transparent', border: '1px solid #2a2110', color: '#8a7d63', fontFamily: "'Outfit', sans-serif", fontSize: 13 }}>Cancel</button>
           </div>
           <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, color: '#7a6c4a', marginTop: 10, textAlign: 'center' }}>Stats shown at Lv. 50. Green = nature boost, red = nature drop.</div>
@@ -555,7 +555,7 @@ window.VIEWS = window.VIEWS || {};
       </span>
     );
 
-    const H3 = ({ children, color = '#ffb347' }) => <h3 style={{ margin: '0 0 14px', fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: 1, color }}>{children}</h3>;
+    const H3 = ({ children, color = '#ffb347' }) => <h3 style={{ margin: '0 0 14px', paddingBottom: 8, fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: 1, color, borderBottom: `1px solid ${color}22`, backgroundImage: `linear-gradient(90deg, ${color}55, transparent 60%)`, backgroundRepeat: 'no-repeat', backgroundSize: '100% 1px', backgroundPosition: '0 100%' }}>{children}</h3>;
 
     return (
       <div>
@@ -569,26 +569,26 @@ window.VIEWS = window.VIEWS || {};
             onSave={(spec) => setSpec(statPick, spec)} onClose={() => setStatPick(null)} />
         )}
         {share && (
-          <div onClick={() => setShare(null)} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(5,4,12,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-            <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 540, background: 'radial-gradient(ellipse at 50% 0%, #1a1330, #0c0a05 80%)', border: '1px solid #6a52c044', borderRadius: 16, padding: 24 }}>
+          <div onClick={() => setShare(null)} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(6,4,2,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+            <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 540, background: 'radial-gradient(ellipse at 50% 0%, #1a1408, #0c0a05 80%)', border: '1px solid #ffb34744', borderRadius: 16, padding: 24 }}>
               <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
                 <button onClick={() => { setCopied(false); setShare('export'); }} style={{ cursor: 'pointer', flex: 1, padding: '9px', borderRadius: 8, fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600, background: share === 'export' ? '#ffb34722' : '#0f0b04', border: `1px solid ${share === 'export' ? '#ffb347' : '#2a2110'}`, color: share === 'export' ? '#fff' : '#9a8d6f' }}>Export "{active.name}"</button>
                 <button onClick={() => setShare('import')} style={{ cursor: 'pointer', flex: 1, padding: '9px', borderRadius: 8, fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600, background: share === 'import' ? '#ffb34722' : '#0f0b04', border: `1px solid ${share === 'import' ? '#ffb347' : '#2a2110'}`, color: share === 'import' ? '#fff' : '#9a8d6f' }}>Import Team</button>
               </div>
               {share === 'export' ? (
                 <div>
-                  <p style={{ margin: '0 0 10px', fontFamily: "'Outfit', sans-serif", fontSize: 13, color: '#bdb6dd', lineHeight: 1.5 }}>Copy this code to share "{active.name}" (Pokémon and their moves) with anyone, or load it on another device.</p>
+                  <p style={{ margin: '0 0 10px', fontFamily: "'Outfit', sans-serif", fontSize: 13, color: '#9a8d6f', lineHeight: 1.5 }}>Copy this code to share "{active.name}" (Pokémon and their moves) with anyone, or load it on another device.</p>
                   <textarea readOnly value={encodeTeam(active)} onFocus={e => e.target.select()} spellCheck={false}
-                    style={{ width: '100%', height: 110, resize: 'none', borderRadius: 10, background: '#0a0818', border: '1px solid #2a2110', color: '#cbbd9f', fontFamily: "'Space Mono', monospace", fontSize: 12, padding: 12, outline: 'none', wordBreak: 'break-all' }} />
+                    style={{ width: '100%', height: 110, resize: 'none', borderRadius: 10, background: '#0a0805', border: '1px solid #2a2110', color: '#cbbd9f', fontFamily: "'Space Mono', monospace", fontSize: 12, padding: 12, outline: 'none', wordBreak: 'break-all' }} />
                   <button onClick={() => { try { navigator.clipboard.writeText(encodeTeam(active)); setCopied(true); } catch (e) {} }}
-                    style={{ cursor: 'pointer', marginTop: 12, width: '100%', padding: '11px', borderRadius: 10, background: copied ? '#0f3320' : 'linear-gradient(135deg, #4a3a9a, #2d2270)', border: '1px solid #6a52c0', color: '#fff', fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 700 }}>{copied ? '✓ Copied!' : 'Copy Code'}</button>
+                    style={{ cursor: 'pointer', marginTop: 12, width: '100%', padding: '11px', borderRadius: 10, background: copied ? '#0f3320' : 'linear-gradient(135deg, #c47a1e, #8a5212)', border: '1px solid #ffb347', color: '#fff', fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 700 }}>{copied ? '✓ Copied!' : 'Copy Code'}</button>
                 </div>
               ) : (
                 <div>
-                  <p style={{ margin: '0 0 10px', fontFamily: "'Outfit', sans-serif", fontSize: 13, color: '#bdb6dd', lineHeight: 1.5 }}>Paste a team code below. It's added as a new loadout (your current teams are kept).</p>
+                  <p style={{ margin: '0 0 10px', fontFamily: "'Outfit', sans-serif", fontSize: 13, color: '#9a8d6f', lineHeight: 1.5 }}>Paste a team code below. It's added as a new loadout (your current teams are kept).</p>
                   <textarea value={importText} onChange={e => setImportText(e.target.value)} placeholder="Paste a VT2… code here" spellCheck={false}
-                    style={{ width: '100%', height: 110, resize: 'none', borderRadius: 10, background: '#0a0818', border: '1px solid #2a2110', color: '#ece3d2', fontFamily: "'Space Mono', monospace", fontSize: 12, padding: 12, outline: 'none', wordBreak: 'break-all' }} />
-                  <button onClick={importLoadout} style={{ cursor: 'pointer', marginTop: 12, width: '100%', padding: '11px', borderRadius: 10, background: 'linear-gradient(135deg, #4a3a9a, #2d2270)', border: '1px solid #6a52c0', color: '#fff', fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 700 }}>Add as New Loadout</button>
+                    style={{ width: '100%', height: 110, resize: 'none', borderRadius: 10, background: '#0a0805', border: '1px solid #2a2110', color: '#ece3d2', fontFamily: "'Space Mono', monospace", fontSize: 12, padding: 12, outline: 'none', wordBreak: 'break-all' }} />
+                  <button onClick={importLoadout} style={{ cursor: 'pointer', marginTop: 12, width: '100%', padding: '11px', borderRadius: 10, background: 'linear-gradient(135deg, #c47a1e, #8a5212)', border: '1px solid #ffb347', color: '#fff', fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 700 }}>Add as New Loadout</button>
                 </div>
               )}
               <button onClick={() => setShare(null)} style={{ cursor: 'pointer', marginTop: 10, width: '100%', padding: '9px', borderRadius: 8, background: 'transparent', border: '1px solid #2a2110', color: '#8a7d63', fontFamily: "'Outfit', sans-serif", fontSize: 13 }}>Close</button>
@@ -601,25 +601,25 @@ window.VIEWS = window.VIEWS || {};
           <div>
             <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: 2, color: '#ffb347', marginBottom: 8 }}>BATTLE PREP</div>
             <h1 style={{ margin: 0, fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 52, lineHeight: 1, color: '#fff', textShadow: '0 0 30px #ffb34766' }}>Team Builder</h1>
-            <p style={{ margin: '12px 0 0', fontFamily: "'Outfit', sans-serif", fontSize: 16, color: '#bdb6dd', maxWidth: 640, lineHeight: 1.6 }}>Build named loadouts, pick each Pokémon's moves, and see your team's type coverage. Share any loadout with a code. Everything saves on this device.</p>
+            <p style={{ margin: '12px 0 0', fontFamily: "'Outfit', sans-serif", fontSize: 16, color: '#9a8d6f', maxWidth: 640, lineHeight: 1.6 }}>Build named loadouts, pick each Pokémon's moves, and see your team's type coverage. Share any loadout with a code. Everything saves on this device.</p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button onClick={() => { setCopied(false); setShare('export'); }} style={{ cursor: 'pointer', background: '#1a1238', border: '1px solid #6a52c066', color: '#cbbd9f', borderRadius: 10, padding: '10px 16px', fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600 }}>⇄ Share</button>
+            <button onClick={() => { setCopied(false); setShare('export'); }} style={{ cursor: 'pointer', background: '#1a1408', border: '1px solid #ffb34766', color: '#cbbd9f', borderRadius: 10, padding: '10px 16px', fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600 }}>⇄ Share</button>
             {team.length > 0 && (
-              <button onClick={clear} style={{ cursor: 'pointer', background: '#2a1020', border: '1px solid #ff5f7e66', color: '#ff8fa6', borderRadius: 10, padding: '10px 16px', fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600 }}>↺ Clear</button>
+              <button onClick={clear} style={{ cursor: 'pointer', background: '#241208', border: '1px solid #ff5f7e66', color: '#ff8fa6', borderRadius: 10, padding: '10px 16px', fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600 }}>↺ Clear</button>
             )}
           </div>
         </div>
 
         {/* loadout tabs */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 18, padding: 10, borderRadius: 12, background: '#0b0918', border: '1px solid #1d1838' }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 18, padding: 10, borderRadius: 12, background: '#0c0a05', border: '1px solid #241d10' }}>
           <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: '#7a6c4a', letterSpacing: 0.5, marginRight: 2 }}>LOADOUTS</span>
           {data.loadouts.map((l, i) => (
-            <button key={l.id} onClick={() => switchTo(i)} style={{ cursor: 'pointer', padding: '7px 13px', borderRadius: 8, fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600, background: i === data.active ? 'linear-gradient(135deg, #322663, #1d1542)' : '#0f0b04', border: `1px solid ${i === data.active ? '#6a52c0' : '#2a2110'}`, color: i === data.active ? '#fff' : '#9a8d6f' }}>
+            <button key={l.id} onClick={() => switchTo(i)} style={{ cursor: 'pointer', padding: '7px 13px', borderRadius: 8, fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600, background: i === data.active ? 'linear-gradient(135deg, #3a2f10, #2a2110)' : '#0f0b04', border: `1px solid ${i === data.active ? '#ffb347' : '#2a2110'}`, color: i === data.active ? '#fff' : '#9a8d6f' }}>
               {l.name} <span style={{ opacity: 0.6, fontSize: 11 }}>({l.members.length})</span>
             </button>
           ))}
-          <button onClick={newLoadout} title="New loadout" style={{ cursor: 'pointer', padding: '7px 12px', borderRadius: 8, background: '#0f0b04', border: '1px dashed #3a2f6e', color: '#b08fff', fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600 }}>＋ New</button>
+          <button onClick={newLoadout} title="New loadout" style={{ cursor: 'pointer', padding: '7px 12px', borderRadius: 8, background: '#0f0b04', border: '1px dashed #4a3a14', color: '#ffd23c', fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600 }}>＋ New</button>
         </div>
 
         {/* active loadout name + delete */}
@@ -627,7 +627,7 @@ window.VIEWS = window.VIEWS || {};
           <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: '#7a6c4a' }}>NAME</span>
           <input value={active.name} onChange={e => renameLoadout(e.target.value)} spellCheck={false}
             style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 22, color: '#fff', background: 'transparent', border: 'none', borderBottom: '1px dashed #2a211099', outline: 'none', padding: '2px 4px', minWidth: 120, maxWidth: 320 }} />
-          <button onClick={deleteLoadout} style={{ cursor: 'pointer', marginLeft: 'auto', background: '#1a1020', border: '1px solid #ff5f7e44', color: '#ff8fa6', borderRadius: 8, padding: '6px 12px', fontFamily: "'Outfit', sans-serif", fontSize: 12, fontWeight: 600 }}>Delete Loadout</button>
+          <button onClick={deleteLoadout} style={{ cursor: 'pointer', marginLeft: 'auto', background: '#160f06', border: '1px solid #ff5f7e44', color: '#ff8fa6', borderRadius: 8, padding: '6px 12px', fontFamily: "'Outfit', sans-serif", fontSize: 12, fontWeight: 600 }}>Delete Loadout</button>
         </div>
 
         {/* team slots */}
@@ -635,8 +635,8 @@ window.VIEWS = window.VIEWS || {};
           {Array.from({ length: MAXTEAM }).map((_, i) => {
             const m = mons[i];
             if (!m) return (
-              <button key={i} onClick={() => setPicking(true)} disabled={team.length >= MAXTEAM && !m} style={{ cursor: 'pointer', minHeight: 180, borderRadius: 14, background: 'repeating-linear-gradient(135deg, #0c0a05, #0c0a05 10px, #0e0b22 10px, #0e0b22 20px)', border: '1.5px dashed #2a2110', color: '#7a6c4a', fontFamily: "'Outfit', sans-serif", fontSize: 14, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <span style={{ fontSize: 30, color: '#3a2f6e' }}>＋</span>
+              <button key={i} onClick={() => setPicking(true)} disabled={team.length >= MAXTEAM && !m} style={{ cursor: 'pointer', minHeight: 180, borderRadius: 14, background: 'repeating-linear-gradient(135deg, #0c0a05, #0c0a05 10px, #100c06 10px, #100c06 20px)', border: '1.5px dashed #2a2110', color: '#7a6c4a', fontFamily: "'Outfit', sans-serif", fontSize: 14, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <span style={{ fontSize: 30, color: '#4a3a14' }}>＋</span>
                 <span>Add Pokémon</span>
               </button>
             );
@@ -652,7 +652,7 @@ window.VIEWS = window.VIEWS || {};
                 onDragEnd={() => { setDragIdx(null); setOverIdx(null); }}
                 style={{ position: 'relative', minHeight: 180, borderRadius: 14, background: `radial-gradient(ellipse at 50% 0%, ${TYPES[m.types[0]].bg}44, #0c0a05 75%)`, border: overIdx === i && dragIdx !== null && dragIdx !== i ? `2px dashed ${accent}` : `1px solid ${accent}55`, padding: 12, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'grab', opacity: dragIdx === i ? 0.4 : 1, transition: 'opacity .15s ease, border-color .15s ease' }}>
                 <span title="Drag to reorder" style={{ position: 'absolute', top: 7, left: 8, color: '#7a6c4a', fontSize: 13, lineHeight: 1, letterSpacing: -1, userSelect: 'none' }}>⠿</span>
-                <button onClick={() => remove(i)} title="Remove" style={{ position: 'absolute', top: 6, right: 6, cursor: 'pointer', width: 22, height: 22, borderRadius: '50%', background: '#1a1238', border: '1px solid #3a2f6e', color: '#cbbd9f', fontSize: 13, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+                <button onClick={() => remove(i)} title="Remove" style={{ position: 'absolute', top: 6, right: 6, cursor: 'pointer', width: 22, height: 22, borderRadius: '50%', background: '#1a1408', border: '1px solid #4a3a14', color: '#cbbd9f', fontSize: 13, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
                 <button onClick={() => go('#/pokemon/' + m.dex)} style={{ cursor: 'pointer', background: 'transparent', border: 'none' }}>
                   <SpriteSlot dex={m.dex} name={m.name} size={84} accent={accent} />
                 </button>
@@ -661,11 +661,11 @@ window.VIEWS = window.VIEWS || {};
                 {/* moves */}
                 <div style={{ width: '100%', marginTop: 9, display: 'flex', flexDirection: 'column', gap: 3 }}>
                   {[0, 1, 2, 3].map(k => (
-                    <div key={k} style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, padding: '3px 7px', borderRadius: 5, background: mv[k] ? '#15112a' : 'transparent', border: `1px solid ${mv[k] ? '#2a2110' : '#181430'}`, color: mv[k] ? '#cdc6e6' : '#3a3550', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{mv[k] || '—'}</div>
+                    <div key={k} style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, padding: '3px 7px', borderRadius: 5, background: mv[k] ? '#1a1408' : 'transparent', border: `1px solid ${mv[k] ? '#2a2110' : '#1d1710'}`, color: mv[k] ? '#cbbd9f' : '#4a4028', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{mv[k] || '—'}</div>
                   ))}
                 </div>
-                <button onClick={() => setMovePick(i)} style={{ cursor: 'pointer', marginTop: 8, width: '100%', padding: '6px', borderRadius: 7, background: '#1a1238', border: '1px solid #3a2f6e', color: '#cbbd9f', fontFamily: "'Outfit', sans-serif", fontSize: 12, fontWeight: 600 }}>{mv.length ? 'Edit Moves' : '+ Add Moves'}</button>
-                <button onClick={() => setStatPick(i)} style={{ cursor: 'pointer', marginTop: 6, width: '100%', padding: '6px', borderRadius: 7, background: '#161226', border: '1px solid #2a2110', color: '#9a8d6f', fontFamily: "'Outfit', sans-serif", fontSize: 12, fontWeight: 600 }}>⚙ EVs / IVs / Nature / Ability</button>
+                <button onClick={() => setMovePick(i)} style={{ cursor: 'pointer', marginTop: 8, width: '100%', padding: '6px', borderRadius: 7, background: '#1a1408', border: '1px solid #4a3a14', color: '#cbbd9f', fontFamily: "'Outfit', sans-serif", fontSize: 12, fontWeight: 600 }}>{mv.length ? 'Edit Moves' : '+ Add Moves'}</button>
+                <button onClick={() => setStatPick(i)} style={{ cursor: 'pointer', marginTop: 6, width: '100%', padding: '6px', borderRadius: 7, background: '#14100a', border: '1px solid #2a2110', color: '#9a8d6f', fontFamily: "'Outfit', sans-serif", fontSize: 12, fontWeight: 600 }}>⚙ EVs / IVs / Nature / Ability</button>
               </div>
             );
           })}
@@ -683,7 +683,7 @@ window.VIEWS = window.VIEWS || {};
                   {threats.map(r => (
                     <div key={r.atk} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{ flex: '0 0 116px' }}><Chip t={r.atk} /></div>
-                      <div style={{ flex: 1, height: 16, borderRadius: 4, background: '#15112a', overflow: 'hidden', display: 'flex' }}>
+                      <div style={{ flex: 1, height: 16, borderRadius: 4, background: '#1a1408', overflow: 'hidden', display: 'flex' }}>
                         <div style={{ width: `${(r.weak / mons.length) * 100}%`, background: r.weak >= 3 ? '#ff5577' : '#ff8f5c', height: '100%' }} />
                       </div>
                       <span style={{ flex: '0 0 60px', textAlign: 'right', fontFamily: "'Space Mono', monospace", fontSize: 12, color: r.weak >= 3 ? '#ff7799' : '#ffb38f', fontWeight: 700 }}>{r.weak} weak</span>
@@ -691,7 +691,7 @@ window.VIEWS = window.VIEWS || {};
                   ))}
                 </div>
               )}
-              <div style={{ height: 1, background: '#1d1838', margin: '18px 0' }} />
+              <div style={{ height: 1, background: '#241d10', margin: '18px 0' }} />
               <H3 color="#5fd1a0">WELL-RESISTED</H3>
               {safe.length === 0 ? <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: '#7a6c4a' }}>None notably resisted.</div> : (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -711,19 +711,19 @@ window.VIEWS = window.VIEWS || {};
               <div style={{ marginBottom: 8, fontFamily: "'Space Mono', monospace", fontSize: 11, color: '#ff8f5c' }}>COVERAGE GAPS</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {notCovered.length === 0 ? <span style={{ color: '#5fd1a0', fontFamily: "'Space Mono', monospace", fontSize: 12 }}>Full coverage!</span> : notCovered.map(t => (
-                  <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 9px', borderRadius: 7, background: '#15112a', border: '1px solid #2a2110', fontFamily: "'Outfit', sans-serif", fontSize: 12, color: '#8a7d63' }}>
+                  <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 9px', borderRadius: 7, background: '#1a1408', border: '1px solid #2a2110', fontFamily: "'Outfit', sans-serif", fontSize: 12, color: '#8a7d63' }}>
                     <span style={{ width: 8, height: 8, borderRadius: '50%', background: TYPES[t].glow, opacity: 0.5 }} />{TYPES[t].name}
                   </span>
                 ))}
               </div>
-              <div style={{ height: 1, background: '#1d1838', margin: '18px 0' }} />
+              <div style={{ height: 1, background: '#241d10', margin: '18px 0' }} />
               <H3>TEAM AVERAGE STATS</H3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {statTotals.map(s => (
                   <div key={s.k} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ flex: '0 0 64px', fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#8a7d63' }}>{STAT_LABELS[s.k].toUpperCase()}</span>
-                    <div style={{ flex: 1, height: 10, borderRadius: 3, background: '#15112a', overflow: 'hidden' }}>
-                      <div style={{ width: `${Math.min(100, (s.avg / 200) * 100)}%`, height: '100%', background: 'linear-gradient(90deg, #6a4dd6, #b08fff)' }} />
+                    <div style={{ flex: 1, height: 10, borderRadius: 3, background: '#1a1408', overflow: 'hidden' }}>
+                      <div style={{ width: `${Math.min(100, (s.avg / 200) * 100)}%`, height: '100%', background: 'linear-gradient(90deg, #ffb347, #ffd23c)' }} />
                     </div>
                     <span style={{ flex: '0 0 36px', textAlign: 'right', fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ece3d2', fontWeight: 700 }}>{s.avg}</span>
                   </div>
