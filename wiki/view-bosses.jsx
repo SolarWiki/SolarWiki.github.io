@@ -39,7 +39,7 @@ window.VIEWS = window.VIEWS || {};
     const fallback = window.VSE_SPECIES_SPRITE && window.VSE_SPECIES_SPRITE[m.sp.toUpperCase()];
     const spriteKey = m.dex || fallback;
     return (
-      <div style={{ background: '#0d0a04', border: `1px solid ${accent}33`, borderRadius: 12, padding: 12 }}>
+      <div style={{ background: '#0d0a04', border: `1px solid ${accent}33`, borderRadius: 12, padding: 12, height: '100%', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
           <button onClick={() => m.dex && go('#/pokemon/' + m.dex)} style={{ cursor: m.dex ? 'pointer' : 'default', background: 'none', border: 'none', padding: 0, flexShrink: 0 }}>
             <SpriteSlot dex={spriteKey} name={m.sp} size={64} accent={accent} />
@@ -75,7 +75,7 @@ window.VIEWS = window.VIEWS || {};
           const bst = order.reduce((a, [, n]) => a + (n || 0), 0);
           const max = Math.max(...order.map(([, n]) => n || 0), 1);
           return (
-            <div style={{ marginTop: 9, paddingTop: 9, borderTop: '1px solid #1c1609' }}>
+            <div style={{ marginTop: 'auto', paddingTop: 9, borderTop: '1px solid #1c1609' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                 <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 8.5, letterSpacing: 1, color: '#7a6c4a', textTransform: 'uppercase' }}>Base Stats</span>
                 <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: '#ffb347', fontWeight: 700 }}>BST {bst}</span>
