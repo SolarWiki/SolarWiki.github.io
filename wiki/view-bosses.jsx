@@ -6,8 +6,16 @@ window.VIEWS = window.VIEWS || {};
   const { go, SpriteSlot, TypePill, MovePill, AbilityPill, ItemPill, PageHead, Empty } = window.VUI;
   const BOSSES = window.VSE_BOSSES;
 
-  const CLASS_COLOR = { 'Rival': '#ff9e58', 'Gym Leader': '#6fa8ff', 'Team Sol': '#c45fff' };
+  const CLASS_COLOR = { 'Rival': '#ff9e58', 'Gym Leader': '#ffd23c', 'Team Sol': '#e0556f' };
   const STAT_LABELS = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
+
+  // Story order for Gym Leaders (the order you fight them). Names not listed fall
+  // to the end, alphabetically. Diana's post-game fight is a Rival, handled separately.
+  const LEADER_ORDER = ['Hongxin & Huangxin', 'Amanda', 'Calix', 'Emilia', 'Benjamin', 'Patriama', 'Angeline', 'Leonard', 'Yira'];
+
+  // Leaders whose single Lv-80 team is actually the POST-GAME rematch, not the
+  // main-story team. (Xin and Benjamin already show their correct story teams.)
+  const POSTGAME_LEADERS = { 'LEADER_Amanda': 1, 'LEADER_Angeline': 1, 'LEADER_Calix': 1, 'LEADER_Emilia': 1, 'LEADER_Leonard': 1, 'LEADER_Patriama': 1, 'LEADER_Yira': 1 };
 
   function evList(str) {
     if (!str) return [];
@@ -60,6 +68,32 @@ window.VIEWS = window.VIEWS || {};
             EVs: {evs.map(e => `${e.n} ${e.l}`).join(' / ')}
           </div>
         )}
+        {(() => {
+          const st = entry ? entry.stats : (info && info.stats);
+          if (!st) return null;
+          const order = [['HP', st.HP], ['Atk', st.ATK], ['Def', st.DEF], ['SpA', st.SPA], ['SpD', st.SPD], ['Spe', st.SPE]];
+          const bst = order.reduce((a, [, n]) => a + (n || 0), 0);
+          const max = Math.max(...order.map(([, n]) => n || 0), 1);
+          return (
+            <div style={{ marginTop: 9, paddingTop: 9, borderTop: '1px solid #1c1609' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 8.5, letterSpacing: 1, color: '#7a6c4a', textTransform: 'uppercase' }}>Base Stats</span>
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: '#ffb347', fontWeight: 700 }}>BST {bst}</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 4 }}>
+                {order.map(([lbl, n]) => (
+                  <div key={lbl} style={{ textAlign: 'center' }}>
+                    <div style={{ height: 28, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+                      <div title={String(n)} style={{ width: '70%', height: `${Math.max(6, ((n || 0) / max) * 28)}px`, background: `linear-gradient(180deg, ${accent}, ${accent}66)`, borderRadius: 2 }} />
+                    </div>
+                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 8, color: '#8a7d63', marginTop: 2 }}>{lbl}</div>
+                    <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: '#cbbd9f', fontWeight: 700 }}>{n}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
     );
   }
@@ -89,7 +123,9 @@ window.VIEWS = window.VIEWS || {};
             </div>
             <div>
               <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 800, fontSize: 24, color: '#fff' }}>{b.name}</span>
-              <div><span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: col, background: col + '18', border: `1px solid ${col}44`, borderRadius: 7, padding: '3px 9px', textTransform: 'uppercase', display: 'inline-block', marginTop: 5 }}>{b.class}</span></div>
+              <div><span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: col, background: col + '18', border: `1px solid ${col}44`, borderRadius: 7, padding: '3px 9px', textTransform: 'uppercase', display: 'inline-block', marginTop: 5 }}>{b.class}</span>
+              {b._postgame && <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: '#ffb347', background: '#2a1c08', border: '1px solid #ffb34744', borderRadius: 7, padding: '3px 9px', textTransform: 'uppercase', display: 'inline-block', marginTop: 5, marginLeft: 6 }}>Post-Game team</span>}
+              </div>
             </div>
           </div>
           {hasEnh && (
@@ -143,7 +179,31 @@ window.VIEWS = window.VIEWS || {};
 
   window.VIEWS.Bosses = function Bosses() {
     const [cls, setCls] = React.useState(null);
-    const list = cls ? BOSSES.filter(b => b.class === cls) : BOSSES;
+
+    // Apply post-game relabel + story ordering once (cheap, derived from BOSSES).
+    const prepared = React.useMemo(() => {
+      const order = (b) => {
+        if (b.class !== 'Gym Leader') return 999;
+        const i = LEADER_ORDER.indexOf(b.name);
+        return i === -1 ? 500 : i;
+      };
+      return BOSSES.map(b => {
+        if (b.class === 'Gym Leader' && POSTGAME_LEADERS[b.type]) {
+          // mark the (single, Lv80) battle as a post-game rematch
+          const battles = b.battles.map(bt => /post.?game/i.test(bt.loc) ? bt : { ...bt, loc: bt.loc + ' (Post-Game rematch)' });
+          return { ...b, battles, _postgame: true };
+        }
+        return b;
+      }).slice().sort((a, b2) => {
+        // keep class grouping order Rival -> Gym Leader -> Team Sol, leaders in story order
+        const classRank = c => (c === 'Rival' ? 0 : c === 'Gym Leader' ? 1 : 2);
+        const cr = classRank(a.class) - classRank(b2.class);
+        if (cr !== 0) return cr;
+        return order(a) - order(b2);
+      });
+    }, []);
+
+    const list = cls ? prepared.filter(b => b.class === cls) : prepared;
     const classes = ['Rival', 'Gym Leader', 'Team Sol'];
     return (
       <div>

@@ -42,10 +42,65 @@ window.VIEWS = window.VIEWS || {};
         {d && <ShinyShowcase d={d} accent={accent} vi={vi} />}
         <div style={{ marginTop: 16 }}>
           <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 600, color: '#8a7d63', marginBottom: 8, letterSpacing: 1, textTransform: 'uppercase' }}>Abilities</div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {entry.abilities.map(a => <AbilityPill key={a} name={a} />)}
-            {entry.hidden && <AbilityPill name={entry.hidden} hidden />}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {entry.abilities.map(a => <AbilityDesc key={a} name={a} />)}
+            {entry.hidden && <AbilityDesc name={entry.hidden} hidden />}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Ability with its description (from VSE_ABILITIES) ------------------
+  const ABIL_INDEX = (() => {
+    const m = {};
+    (window.VSE_ABILITIES || []).forEach(a => { m[String(a.name).toLowerCase()] = a; });
+    return m;
+  })();
+  function AbilityDesc({ name, hidden }) {
+    const info = ABIL_INDEX[String(name).toLowerCase()];
+    return (
+      <div style={{ background: '#0c0a05', border: `1px solid ${hidden ? '#ffb34733' : '#241d10'}`, borderRadius: 10, padding: '10px 12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: info && info.desc ? 6 : 0 }}>
+          <AbilityPill name={name} hidden={hidden} />
+          {info && info.changed && <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 8.5, fontWeight: 700, letterSpacing: 0.5, color: '#ffb347', background: '#2a1c08', border: '1px solid #ffb34755', borderRadius: 5, padding: '2px 6px', textTransform: 'uppercase' }}>Changed</span>}
+        </div>
+        {info && info.desc && <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 12.5, color: '#b3a892', lineHeight: 1.5 }}>{info.desc}</div>}
+        {info && info.changed && info.old && <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11.5, color: '#8a7d63', marginTop: 5, lineHeight: 1.45 }}><span style={{ color: '#b5552f', fontWeight: 600 }}>Was: </span>{info.old}</div>}
+      </div>
+    );
+  }
+
+  // ---- Defensive type matchup chart --------------------------------------
+  function TypeMatchup({ types }) {
+    const G = window.VGAME;
+    if (!G || !G.eff || !G.TYPE_ORDER) return null;
+    const buckets = { '0': [], '0.25': [], '0.5': [], '2': [], '4': [] };
+    G.TYPE_ORDER.forEach(atk => {
+      let mult = 1;
+      types.forEach(def => { mult *= G.eff(atk, def); });
+      const key = String(mult);
+      if (buckets[key]) buckets[key].push(atk);
+    });
+    const rows = [
+      { label: 'Immune', mult: '0', color: '#6a6a6a', bg: '#141414' },
+      { label: '¼× damage', mult: '0.25', color: '#5fd1a0', bg: '#0e1a12' },
+      { label: '½× damage', mult: '0.5', color: '#8fd17e', bg: '#101a0e' },
+      { label: '2× weak', mult: '2', color: '#ffb347', bg: '#1c1407' },
+      { label: '4× weak', mult: '4', color: '#ff8f5c', bg: '#1d1008' },
+    ].filter(r => buckets[r.mult].length);
+    if (!rows.length) return null;
+    const TypePill = window.VUI.TypePill;
+    return (
+      <div style={{ marginTop: 26 }}>
+        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 600, color: '#8a7d63', marginBottom: 12, letterSpacing: 1, textTransform: 'uppercase' }}>Type Defenses</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {rows.map(r => (
+            <div key={r.mult} style={{ display: 'flex', alignItems: 'center', gap: 12, background: r.bg, border: `1px solid ${r.color}33`, borderRadius: 10, padding: '8px 12px' }}>
+              <span style={{ flex: '0 0 92px', fontFamily: "'Space Mono', monospace", fontSize: 11, fontWeight: 700, color: r.color, letterSpacing: 0.5 }}>{r.label}</span>
+              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>{buckets[r.mult].map(t => <TypePill key={t} t={t} />)}</div>
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -97,33 +152,132 @@ window.VIEWS = window.VIEWS || {};
     );
   }
 
-  // ---- Evolution family --------------------------------------------------
+  // ---- Where to find (reverse-indexed from VSE_LOCATIONS) ----------------
+  const ENCOUNTER_INDEX = (() => {
+    const idx = {};
+    (window.VSE_LOCATIONS || []).forEach(area => {
+      (area.groups || []).forEach(g => {
+        (g.enc || []).forEach(e => {
+          const dex = String(e.d).padStart(3, '0');
+          (idx[dex] = idx[dex] || []).push({
+            area: area.name, sub: g.sub || null, method: e.m, level: e.l, rarity: e.r,
+          });
+        });
+      });
+    });
+    return idx;
+  })();
+  function WhereToFind({ dex }) {
+    const spots = ENCOUNTER_INDEX[String(dex).padStart(3, '0')];
+    if (!spots || !spots.length) return null;
+    const pct = r => (typeof r === 'number' ? Math.round(r * 100) + '%' : null);
+    return (
+      <div style={{ marginTop: 26 }}>
+        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 600, color: '#8a7d63', marginBottom: 12, letterSpacing: 1, textTransform: 'uppercase' }}>Where to Find</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {spots.map((s, i) => (
+            <button key={i} onClick={() => go('#/locations')} style={{ cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', background: '#0c0a05', border: '1px solid #241d10', borderRadius: 10, padding: '9px 12px' }}>
+              <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600, color: '#ece3d2' }}>{s.area}{s.sub ? ` · ${s.sub}` : ''}</span>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: '#ffb347', background: '#1c1407', border: '1px solid #ffb34733', borderRadius: 5, padding: '2px 7px' }}>{s.method}</span>
+              {s.level && <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: '#9a8d6f' }}>Lv {s.level}</span>}
+              {pct(s.rarity) && <span style={{ marginLeft: 'auto', fontFamily: "'Space Mono', monospace", fontSize: 10, color: '#8a7d63' }}>{pct(s.rarity)}</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Evolution family (branching tree) ---------------------------------
   function EvoFamily({ d }) {
     const baseKey = window.VSE_FAMILY_OF && window.VSE_FAMILY_OF[d.dex];
     const fam = baseKey && window.VSE_FAMILIES && window.VSE_FAMILIES[baseKey];
     if (!fam || fam.length < 2) return null; // no evolution
-    return (
-      <div style={{ marginTop: 26 }}>
-        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 600, color: '#8a7d63', marginBottom: 12, letterSpacing: 1, textTransform: 'uppercase' }}>Evolution Family</div>
+
+    const byD = {}; fam.forEach(s => { byD[s.dex] = s; });
+    const hasBranch = fam.some(s => s.from);
+
+    const Node = ({ s, showArrow }) => (
+      <button onClick={() => s.dex !== d.dex && go('#/pokemon/' + s.dex)} style={{
+        cursor: s.dex === d.dex ? 'default' : 'pointer', background: s.dex === d.dex ? '#1a1407' : 'transparent',
+        border: `1px solid ${s.dex === d.dex ? '#ffb34766' : '#241d10'}`, borderRadius: 12, padding: 8, textAlign: 'center', flexShrink: 0,
+      }}>
+        <SpriteSlot dex={s.dex} name={s.name} size={72} accent={s.dex === d.dex ? '#ffb347' : '#5a5240'} />
+        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 12, fontWeight: s.dex === d.dex ? 700 : 500, color: s.dex === d.dex ? '#fff' : '#b3a892', marginTop: 4 }}>{s.name}</div>
+      </button>
+    );
+    const Arrow = ({ method }) => (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 6px', minWidth: 70 }}>
+        <span style={{ color: '#ffb347', fontSize: 18, lineHeight: 1 }}>→</span>
+        <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, color: '#9a8d6f', textAlign: 'center', marginTop: 2 }}>{(method || '').replace(/^at /, '')}</span>
+      </div>
+    );
+
+    let body;
+    if (!hasBranch) {
+      // simple linear chain (unchanged behaviour for ordinary lines)
+      body = (
         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
           {fam.map((s, i) => (
             <React.Fragment key={s.dex}>
-              {i > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 6px', minWidth: 70 }}>
-                  <span style={{ color: '#ffb347', fontSize: 18, lineHeight: 1 }}>→</span>
-                  <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, color: '#9a8d6f', textAlign: 'center', marginTop: 2 }}>{(s.method || '').replace(/^at /, '')}</span>
-                </div>
-              )}
-              <button onClick={() => s.dex !== d.dex && go('#/pokemon/' + s.dex)} style={{
-                cursor: s.dex === d.dex ? 'default' : 'pointer', background: s.dex === d.dex ? '#1a1407' : 'transparent',
-                border: `1px solid ${s.dex === d.dex ? '#ffb34766' : '#241d10'}`, borderRadius: 12, padding: 8, textAlign: 'center',
-              }}>
-                <SpriteSlot dex={s.dex} name={s.name} size={72} accent={s.dex === d.dex ? '#ffb347' : '#5a5240'} />
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 12, fontWeight: s.dex === d.dex ? 700 : 500, color: s.dex === d.dex ? '#fff' : '#b3a892', marginTop: 4 }}>{s.name}</div>
-              </button>
+              {i > 0 && <Arrow method={s.method} />}
+              <Node s={s} />
             </React.Fragment>
           ))}
         </div>
+      );
+    } else {
+      // branching: build children map from `from`; chain single-child runs,
+      // stack a column when a node has multiple children (Serebii style).
+      const children = {};
+      fam.forEach(s => { if (s.from) (children[s.from] = children[s.from] || []).push(s); });
+      const root = fam.find(s => !s.from) || fam[0];
+
+      const renderFrom = (node) => {
+        const kids = children[node.dex] || [];
+        if (!kids.length) return null;
+        if (kids.length === 1) {
+          const k = kids[0];
+          return (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Arrow method={k.method} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Node s={k} />
+                {renderFrom(k)}
+              </div>
+            </div>
+          );
+        }
+        return (
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', color: '#4a3a14' }}>
+              <div style={{ width: 14, borderTop: '2px solid #3a2f10' }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, borderLeft: '2px solid #3a2f10', paddingLeft: 8 }}>
+              {kids.map(k => (
+                <div key={k.dex} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Arrow method={k.method} />
+                  <Node s={k} />
+                  {renderFrom(k)}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      };
+
+      body = (
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
+          <Node s={root} />
+          {renderFrom(root)}
+        </div>
+      );
+    }
+
+    return (
+      <div style={{ marginTop: 26 }}>
+        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 600, color: '#8a7d63', marginBottom: 12, letterSpacing: 1, textTransform: 'uppercase' }}>Evolution Family</div>
+        {body}
       </div>
     );
   }
@@ -278,6 +432,8 @@ window.VIEWS = window.VIEWS || {};
               </div>
             )}
             <StatBlock entry={cur} vanilla={vi === 0 ? (window.VSE_VANILLA && window.VSE_VANILLA[d.dex]) : null} d={d} accent={accent} vi={vi} />
+            <TypeMatchup types={cur.types} />
+            {vi === 0 && <WhereToFind dex={d.dex} />}
             {vi === 0 && <EvoFamily d={d} />}
             {vi === 0 && <Learnset d={d} />}
           </div>

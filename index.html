@@ -66,6 +66,7 @@
 
 <script src="wiki/data-dex.js"></script>
 <script src="wiki/data-locations.js"></script>
+<script src="wiki/data-faq.js"></script>
 <script type="text/babel" src="wiki/ui.jsx"></script>
 <script type="text/babel" src="wiki/view-pokedex.jsx"></script>
 <script type="text/babel" src="wiki/view-detail.jsx"></script>
@@ -80,6 +81,7 @@
 <script type="text/babel" src="wiki/view-team.jsx"></script>
 <script type="text/babel" src="wiki/view-nuzlocke.jsx"></script>
 <script type="text/babel" src="wiki/view-locations.jsx"></script>
+<script type="text/babel" src="wiki/view-faq.jsx"></script>
 
 <script type="text/babel">
   function parseHash(h) {
@@ -111,9 +113,10 @@
     else if (view === 'damage') content = <window.VIEWS.Damage />;
     else if (view === 'nuzlocke') content = <window.VIEWS.Nuzlocke />;
     else if (view === 'locations') content = <window.VIEWS.Locations />;
+    else if (view === 'faq') content = <window.VIEWS.FAQ param={param} />;
     else content = <window.VIEWS.Pokedex query={query} />;
 
-    const NAV = [['pokedex', 'Pokédex'], ['bosses', 'Bosses'], ['types', 'Type Calc'], ['abilities', 'Abilities'], ['moves', 'Moves'], ['items', 'Items'], ['tms', 'TMs'], ['team', 'Team Builder'], ['damage', 'Damage Calc'], ['nuzlocke', 'Nuzlocke'], ['locations', 'Locations']];
+    const NAV = [['pokedex', 'Pokédex'], ['bosses', 'Bosses'], ['types', 'Type Calc'], ['abilities', 'Abilities'], ['moves', 'Moves'], ['items', 'Items'], ['tms', 'TMs'], ['team', 'Team Builder'], ['damage', 'Damage Calc'], ['nuzlocke', 'Nuzlocke'], ['locations', 'Locations'], ['faq', 'FAQ']];
 
     return (
       <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 24px 64px' }}>

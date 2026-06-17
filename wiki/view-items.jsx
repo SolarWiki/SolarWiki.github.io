@@ -6,10 +6,28 @@ window.VIEWS = window.VIEWS || {};
 
   const POCKETS = [
     ['Poké Balls', '#ff7a6f'], ['Medicine', '#ff8f8f'], ['Items', '#cbb88f'],
-    ['Evolution', '#7fd17a'], ['Battle Items', '#ffb347'], ['Berries', '#c45fff'],
-    ['Key Items', '#6fa8ff'], ['Treasures', '#ffd23c'],
+    ['Evolution', '#7fd17a'], ['Battle Items', '#ffb347'], ['Berries', '#e0556f'],
+    ['Key Items', '#ffd23c'], ['Treasures', '#ffcf5a'],
   ];
   const pocketColor = (c) => (POCKETS.find(p => p[0] === c) || [, '#9a8d6f'])[1];
+
+  // Unused Key Items that should be omitted from the wiki (per lead dev).
+  const OMIT_KEY_ITEMS = new Set([
+    'Old Rod','Good Rod','Itemfinder','Dowsing Machine','Poke Radar','Poké Radar','Maps','Town Map',
+    'Poke Flute','Poké Flute','Soot Sack','Silph Scope','Devon Scope','Sprayduck','Wailmer Pail',
+    'Aurora Ticket','Old Sea Map','Sprink Lotad','Mega Ring','Escape Rope','Infinite Rope',
+    'Pokemon Box Link','Pokémon Box Link','Exp Charm','EXP Charm','Catching Charm','Night Flute','Sky Flute',
+    'Earth Flute','Solar Flute','Sprinklotad',
+  ]);
+
+  // Generalize an item location string down to the route/town it references, when
+  // one is named; otherwise keep it. (Per lead dev: "behind strength boulder" -> "Route 14".)
+  const PLACE_RE = /(Route\s*\d+|[A-Z][a-z]+(?:\s+(?:City|Town|Gym|Cave|Cavern|Mines|Volcano|Ruins|Forest|Hills|Mountain|Mount|Island|Tower|Mansion|Power Plant)))/;
+  function generalizeLoc(s) {
+    if (!s) return s;
+    const m = s.match(PLACE_RE);
+    return m ? m[1].replace(/\s+/g, ' ').trim() : s;
+  }
 
   function Card({ it }) {
     const col = pocketColor(it.cat);
@@ -35,7 +53,7 @@ window.VIEWS = window.VIEWS || {};
             {it.desc && <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, color: '#c9bca0', lineHeight: 1.45 }}>{it.desc}</div>}
             {it.locs.length > 0 && (
               <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, color: '#8a7d63', marginTop: 8, display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-                <span style={{ color: '#6a5d42' }}>⌖</span><span style={{ fontFamily: "'Outfit', sans-serif" }}>{it.locs.join(', ')}</span>
+                <span style={{ color: '#6a5d42' }}>⌖</span><span style={{ fontFamily: "'Outfit', sans-serif" }}>{Array.from(new Set(it.locs.map(generalizeLoc))).join(', ')}</span>
               </div>
             )}
           </div>
@@ -50,6 +68,7 @@ window.VIEWS = window.VIEWS || {};
     React.useEffect(() => { if (param) setQ(decodeURIComponent(param)); }, [param]);
     const query = q.trim().toLowerCase();
     let list = ITEMS.filter(it => {
+      if (OMIT_KEY_ITEMS.has(it.name)) return false; // drop unused key items (per lead dev)
       if (pocket && it.cat !== pocket) return false;
       if (query && !(it.name.toLowerCase().includes(query) || (it.desc || '').toLowerCase().includes(query) || it.locs.join(' ').toLowerCase().includes(query))) return false;
       return true;
