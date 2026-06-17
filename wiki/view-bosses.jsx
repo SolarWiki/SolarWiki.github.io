@@ -39,7 +39,7 @@ window.VIEWS = window.VIEWS || {};
     const fallback = window.VSE_SPECIES_SPRITE && window.VSE_SPECIES_SPRITE[m.sp.toUpperCase()];
     const spriteKey = m.dex || fallback;
     return (
-      <div style={{ background: '#0d0a04', border: `1px solid ${accent}33`, borderRadius: 12, padding: 12, height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ background: '#0d0a04', border: `1px solid ${accent}33`, borderRadius: 12, padding: 12, boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
           <button onClick={() => m.dex && go('#/pokemon/' + m.dex)} style={{ cursor: m.dex ? 'pointer' : 'default', background: 'none', border: 'none', padding: 0, flexShrink: 0 }}>
             <SpriteSlot dex={spriteKey} name={m.sp} size={64} accent={accent} />
