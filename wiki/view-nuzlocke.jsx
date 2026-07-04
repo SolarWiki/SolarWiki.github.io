@@ -337,7 +337,7 @@ window.VIEWS = window.VIEWS || {};
       : 'You black out / white out with no usable Pokémon remaining.';
     if (soloOrTypeDeath) loss += ' Any Eclipse Clause failure also ends the run instantly.';
 
-    return { theme, tier, score, extreme, mode, core: CORE, ...out, win: 'Defeat the Champion and clear the league with at least one living Pokémon.', loss };
+    return { theme, tier, score, extreme, mode, core: CORE, ...out, win: 'Become the Solar Monarch with at least one living Pokémon.', loss };
   }
 
   // ---- the three forge buttons ----

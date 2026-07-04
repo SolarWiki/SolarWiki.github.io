@@ -16,7 +16,7 @@ window.VIEWS = window.VIEWS || {};
           <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 15, color: '#fff' }}>{m.name}</div>
           {m.desc && <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11.5, color: '#9a8d6f', marginTop: 2, lineHeight: 1.4 }}>{m.desc}</div>}
         </div>
-        <div>{t ? <TypePill t={m.type} sm onClick={() => {}} /> : <span style={{ fontSize: 11, color: '#6a5d42' }}>{m.type}</span>}</div>
+        <div>{t ? <TypePill t={m.type} sm onClick={() => {}} /> : <span style={{ fontSize: 11, color: '#6a5d42' }}>{m.type === 'QMARKS' ? '???' : m.type}</span>}</div>
         <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, fontWeight: 600, color: cls }}>{m.cls}</div>
         <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: '#fff6e8', textAlign: 'right' }}>{m.pow || '—'}</div>
         <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: '#cbbd9f', textAlign: 'right' }}>{m.acc || '—'}</div>

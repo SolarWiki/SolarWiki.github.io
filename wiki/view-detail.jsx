@@ -110,43 +110,120 @@ window.VIEWS = window.VIEWS || {};
   // Super shiny hue-shifts the SHINY sprite in 45° increments, per the game's
   // adjust_shiny logic: superHue = (1 + rand(7)) * 45  ->  45..360. The filter
   // is applied to the sprite image only, never its background.
+  // HSV hue rotation, matching the game's adjust_shiny (which works in HSV,
+  // not the constant-luma matrix that CSS hue-rotate / LCH-style rotation uses).
+  // Renders the sprite to a canvas, shifts each pixel's H in HSV, redraws.
+  function HsvSprite({ src, deg, size, accent }) {
+    const canvasRef = React.useRef(null);
+    const [failed, setFailed] = React.useState(false);
+    React.useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const w = img.naturalWidth, h = img.naturalHeight;
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = false;
+          ctx.clearRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0);
+          if (deg % 360 !== 0) {
+            const data = ctx.getImageData(0, 0, w, h);
+            const p = data.data;
+            const shift = ((deg % 360) + 360) % 360;
+            for (let i = 0; i < p.length; i += 4) {
+              if (p[i + 3] === 0) continue; // skip transparent
+              const r = p[i] / 255, g = p[i + 1] / 255, b = p[i + 2] / 255;
+              const max = Math.max(r, g, b), min = Math.min(r, g, b), dl = max - min;
+              let hh = 0;
+              if (dl !== 0) {
+                if (max === r) hh = ((g - b) / dl) % 6;
+                else if (max === g) hh = (b - r) / dl + 2;
+                else hh = (r - g) / dl + 4;
+                hh *= 60; if (hh < 0) hh += 360;
+              }
+              const s = max === 0 ? 0 : dl / max, v = max;
+              hh = (hh + shift) % 360;
+              // HSV -> RGB
+              const c = v * s, x = c * (1 - Math.abs(((hh / 60) % 2) - 1)), m = v - c;
+              let rr = 0, gg = 0, bb = 0;
+              if (hh < 60) { rr = c; gg = x; }
+              else if (hh < 120) { rr = x; gg = c; }
+              else if (hh < 180) { gg = c; bb = x; }
+              else if (hh < 240) { gg = x; bb = c; }
+              else if (hh < 300) { rr = x; bb = c; }
+              else { rr = c; bb = x; }
+              p[i] = Math.round((rr + m) * 255);
+              p[i + 1] = Math.round((gg + m) * 255);
+              p[i + 2] = Math.round((bb + m) * 255);
+            }
+            ctx.putImageData(data, 0, 0);
+          }
+          setFailed(false);
+        } catch (e) { setFailed(true); } // CORS-tainted canvas etc.
+      };
+      img.onerror = () => setFailed(true);
+      img.src = src;
+    }, [src, deg]);
+    // Frame matches SpriteSlot so all three cells look identical bar the pixels.
+    return (
+      <div style={{
+        position: 'relative', width: size, height: size, borderRadius: 10, overflow: 'hidden', margin: '0 auto',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'radial-gradient(circle at 50% 42%, #2a1c08 0%, #0a0905 74%)', border: `1px solid ${accent}33`,
+      }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 44%, transparent 30%, #ffb34711 42%, transparent 52%)' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(1px 1px at 20% 30%, #fff7, transparent), radial-gradient(1px 1px at 70% 60%, #fff5, transparent), radial-gradient(1px 1px at 42% 80%, #fff6, transparent), radial-gradient(2px 2px at 62% 22%, #ffd98a88, transparent)' }} />
+        <canvas ref={canvasRef} style={{ position: 'absolute', inset: '8%', width: '84%', height: '84%', objectFit: 'contain', imageRendering: 'pixelated', display: failed ? 'none' : 'block', zIndex: 3 }} />
+        {failed && <img src={src} alt="" style={{ position: 'absolute', inset: '8%', width: '84%', height: '84%', objectFit: 'contain', imageRendering: 'pixelated', zIndex: 3, filter: `hue-rotate(${deg}deg)` }} />}
+      </div>
+    );
+  }
+
   function ShinyShowcase({ d, accent, vi }) {
-    const HUE_STEPS = [45, 90, 135, 180, 225, 270, 315, 360];
+    const HUE_STEPS = [45, 90, 135, 180, 225, 270, 315];
     const [step, setStep] = React.useState(0);
     const hue = HUE_STEPS[step];
     // Sprite suffixes: base variant (vi 0) -> "", "shiny"; form i -> "i", "i-shiny".
     const formPart = vi > 0 ? String(vi) + '-' : '';
     const normalSuffix = vi > 0 ? String(vi) : undefined;
     const shinySuffix = formPart + 'shiny';
-    // Super shiny = the SHINY sprite hue-shifted in 45° increments (game's adjust_shiny:
-    // superHue = (1 + rand(7)) * 45). Pure hue rotation, no other effects.
-    const superFilter = `hue-rotate(${hue}deg)`;
-    const cell = (label, color, suffix, filter, extra) => (
+    // Resolve the shiny sprite URL the same way SpriteSlot does, so HsvSprite
+    // can rotate it on a canvas (HSV) rather than via CSS filter (LCH-ish).
+    const shinyUrl = (window.VUI.spriteUrl ? window.VUI.spriteUrl(d.dex, shinySuffix) : null);
+    const cell = (label, color, suffix, node) => (
       <div style={{ flex: 1, minWidth: 130, padding: 14, borderRadius: 12, background: '#0d0a04', border: `1px solid ${color}44`, textAlign: 'center' }}>
         <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: 1, color, marginBottom: 10, textTransform: 'uppercase' }}>{label}</div>
-        <SpriteSlot dex={d.dex} name={d.name} size={104} accent={color} suffix={suffix} imgFilter={filter} />
-        {extra}
+        {node}
       </div>
     );
+    const superNode = shinyUrl
+      ? <HsvSprite src={shinyUrl} deg={hue} size={104} accent="#ff66cc" />
+      : <SpriteSlot dex={d.dex} name={d.name} size={104} accent="#ff66cc" suffix={shinySuffix} imgFilter={`hue-rotate(${hue}deg)`} />;
     return (
       <div style={{ marginTop: 26 }}>
         <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 600, color: '#8a7d63', marginBottom: 12, letterSpacing: 1, textTransform: 'uppercase' }}>Sprite Showcase</div>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          {cell('Normal', accent, normalSuffix, 'none')}
-          {cell('Shiny', '#ffd700', shinySuffix, 'none')}
-          {cell('Super Shiny', '#ff66cc', shinySuffix, superFilter, (
-            <div style={{ marginTop: 12 }}>
-              <input type="range" min={0} max={HUE_STEPS.length - 1} step={1} value={step}
-                onChange={e => setStep(Number(e.target.value))}
-                style={{ width: '100%', accentColor: '#ff66cc', cursor: 'pointer' }} />
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 6 }}>
-                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ff8fd6' }}>shiny hue +{hue}°</span>
+          {cell('Normal', accent, normalSuffix, <SpriteSlot dex={d.dex} name={d.name} size={104} accent={accent} suffix={normalSuffix} />)}
+          {cell('Shiny', '#ffd700', shinySuffix, <SpriteSlot dex={d.dex} name={d.name} size={104} accent="#ffd700" suffix={shinySuffix} />)}
+          {cell('Super Shiny', '#ff66cc', shinySuffix, (
+            <React.Fragment>
+              {superNode}
+              <div style={{ marginTop: 12 }}>
+                <input type="range" min={0} max={HUE_STEPS.length - 1} step={1} value={step}
+                  onChange={e => setStep(Number(e.target.value))}
+                  style={{ width: '100%', accentColor: '#ff66cc', cursor: 'pointer' }} />
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 6 }}>
+                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ff8fd6' }}>shiny hue +{hue}°</span>
+                </div>
               </div>
-            </div>
+            </React.Fragment>
           ))}
         </div>
         <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, color: '#6a5d42', marginTop: 10, lineHeight: 1.5 }}>
-          Shiny is the real shiny sprite. Super shiny rotates the shiny's hue in 45° steps (the game's <code>superHue = (1 + rand(7)) × 45</code>). Note: this is a browser hue-rotate preview and approximates — not exactly matches — the game's in-engine palette shift; real super-shiny rips would be exact.
+          Shiny is the real shiny sprite. Super shiny rotates the shiny's hue in 45° steps (the game's <code>superHue = (1 + rand(7)) × 45</code>), applied in HSV to match the in-engine palette shift.
         </div>
       </div>
     );
@@ -227,57 +304,164 @@ window.VIEWS = window.VIEWS || {};
         </div>
       );
     } else {
-      // branching: build children map from `from`; chain single-child runs,
-      // stack a column when a node has multiple children (Serebii style).
+      // branching: build children map from `from`.
       const children = {};
       fam.forEach(s => { if (s.from) (children[s.from] = children[s.from] || []).push(s); });
       const root = fam.find(s => !s.from) || fam[0];
 
-      const renderFrom = (node) => {
-        const kids = children[node.dex] || [];
-        if (!kids.length) return null;
-        if (kids.length === 1) {
-          const k = kids[0];
-          return (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Arrow method={k.method} />
+      // A "hub" is a single parent that fans out to many children (Eevee = 8,
+      // Cosmoem = 2 but preceded by a chain). Use a radial wheel when one node
+      // has >= 4 direct children; otherwise fall back to the vertical tree.
+      const hubDex = Object.keys(children).find(k => (children[k] || []).length >= 4);
+
+      if (hubDex) {
+        body = <RadialEvo fam={fam} children={children} hubDex={hubDex} root={root} curDex={d.dex} />;
+      } else {
+        const renderFrom = (node) => {
+          const kids = children[node.dex] || [];
+          if (!kids.length) return null;
+          if (kids.length === 1) {
+            const k = kids[0];
+            return (
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Node s={k} />
-                {renderFrom(k)}
-              </div>
-            </div>
-          );
-        }
-        return (
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: 4 }}>
-            <div style={{ display: 'flex', alignItems: 'center', color: '#4a3a14' }}>
-              <div style={{ width: 14, borderTop: '2px solid #3a2f10' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, borderLeft: '2px solid #3a2f10', paddingLeft: 8 }}>
-              {kids.map(k => (
-                <div key={k.dex} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Arrow method={k.method} />
+                <Arrow method={k.method} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <Node s={k} />
                   {renderFrom(k)}
                 </div>
-              ))}
+              </div>
+            );
+          }
+          return (
+            <div style={{ display: 'flex', alignItems: 'stretch', gap: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', color: '#4a3a14' }}>
+                <div style={{ width: 14, borderTop: '2px solid #3a2f10' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, borderLeft: '2px solid #3a2f10', paddingLeft: 8 }}>
+                {kids.map(k => (
+                  <div key={k.dex} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <Arrow method={k.method} />
+                    <Node s={k} />
+                    {renderFrom(k)}
+                  </div>
+                ))}
+              </div>
             </div>
+          );
+        };
+        body = (
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
+            <Node s={root} />
+            {renderFrom(root)}
           </div>
         );
-      };
-
-      body = (
-        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
-          <Node s={root} />
-          {renderFrom(root)}
-        </div>
-      );
+      }
     }
 
+    // Eevee's family gets the "Eeveelutions" header; others say "Evolution Family".
+    const isEevee = baseKey === '134';
     return (
       <div style={{ marginTop: 26 }}>
-        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 600, color: '#8a7d63', marginBottom: 12, letterSpacing: 1, textTransform: 'uppercase' }}>Evolution Family</div>
+        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 600, color: '#8a7d63', marginBottom: 12, letterSpacing: 1, textTransform: 'uppercase' }}>{isEevee ? 'Eeveelutions' : 'Evolution Family'}</div>
         {body}
+      </div>
+    );
+  }
+
+  // ---- Radial evolution wheel (hub fans out to many children) -------------
+  // Used for big splits like Eevee. Any chain leading INTO the hub (e.g.
+  // Cosmog -> Cosmoem -> {Solgaleo, Lunala}) is drawn as a short pre-chain to
+  // the left of the wheel, then the hub sits centered with children on a ring.
+  function RadialEvo({ fam, children, hubDex, root, curDex }) {
+    const byD = {}; fam.forEach(s => { byD[s.dex] = s; });
+    const kids = children[hubDex] || [];
+
+    // Build the pre-chain from root down to the hub (root, ..., hub).
+    const preChain = [];
+    let walk = byD[hubDex];
+    const guard = new Set();
+    while (walk && !guard.has(walk.dex)) { guard.add(walk.dex); preChain.unshift(walk); walk = walk.from ? byD[walk.from] : null; }
+    // preChain ends with the hub; the nodes before it are the lead-in.
+    const lead = preChain.slice(0, -1); // everything before the hub
+
+    // Wheel geometry. Radius scales a touch with child count so labels breathe.
+    const n = kids.length;
+    const R = n >= 8 ? 150 : n >= 6 ? 138 : 124;
+    const NODE = 96;            // node box footprint (sprite 72 + label + padding)
+    const size = (R + NODE) * 2; // svg/canvas square side
+    const cx = size / 2, cy = size / 2;
+
+    // Angles: start at the right (0°) and sweep clockwise, but nudge so the
+    // first child sits at top-right for a balanced look.
+    const start = -Math.PI / 2 + (n % 2 === 0 ? Math.PI / n : 0);
+    const pts = kids.map((k, i) => {
+      const a = start + (i * 2 * Math.PI) / n;
+      return { k, a, x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) };
+    });
+
+    const NodeMini = ({ s, hub }) => (
+      <button onClick={() => s.dex !== curDex && go('#/pokemon/' + s.dex)} style={{
+        cursor: s.dex === curDex ? 'default' : 'pointer',
+        background: s.dex === curDex ? '#1a1407' : (hub ? '#120d05' : 'transparent'),
+        border: `1px solid ${s.dex === curDex ? '#ffb34788' : (hub ? '#ffb34744' : '#241d10')}`,
+        borderRadius: 12, padding: 7, textAlign: 'center', width: NODE, boxSizing: 'border-box',
+      }}>
+        <SpriteSlot dex={s.dex} name={s.name} size={64} accent={s.dex === curDex ? '#ffb347' : (hub ? '#c47a1e' : '#5a5240')} />
+        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11.5, fontWeight: s.dex === curDex ? 700 : 500, color: s.dex === curDex ? '#fff' : '#b3a892', marginTop: 3, lineHeight: 1.15 }}>{s.name}</div>
+      </button>
+    );
+
+    const wheel = (
+      <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+        {/* spokes */}
+        <svg width={size} height={size} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+          {pts.map(({ k, x, y }) => (
+            <line key={k.dex} x1={cx} y1={cy} x2={x} y2={y} stroke="#3a2f10" strokeWidth="1.5" />
+          ))}
+        </svg>
+        {/* method labels at the spoke midpoints */}
+        {pts.map(({ k, a }) => {
+          const mx = cx + (R * 0.52) * Math.cos(a);
+          const my = cy + (R * 0.52) * Math.sin(a);
+          return (
+            <div key={'lbl' + k.dex} style={{
+              position: 'absolute', left: mx, top: my, transform: 'translate(-50%, -50%)',
+              fontFamily: "'Outfit', sans-serif", fontSize: 9.5, color: '#9a8d6f', textAlign: 'center',
+              background: '#0a0805', padding: '1px 5px', borderRadius: 5, whiteSpace: 'nowrap', pointerEvents: 'none',
+            }}>{(k.method || '').replace(/^at /, '').replace(/^use /, '')}</div>
+          );
+        })}
+        {/* hub (center) */}
+        <div style={{ position: 'absolute', left: cx, top: cy, transform: 'translate(-50%, -50%)' }}>
+          <NodeMini s={byD[hubDex]} hub />
+        </div>
+        {/* children on the ring */}
+        {pts.map(({ k, x, y }) => (
+          <div key={k.dex} style={{ position: 'absolute', left: x, top: y, transform: 'translate(-50%, -50%)' }}>
+            <NodeMini s={k} />
+          </div>
+        ))}
+      </div>
+    );
+
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+        {lead.map((s, i) => (
+          <React.Fragment key={s.dex}>
+            <button onClick={() => s.dex !== curDex && go('#/pokemon/' + s.dex)} style={{
+              cursor: s.dex === curDex ? 'default' : 'pointer', background: s.dex === curDex ? '#1a1407' : 'transparent',
+              border: `1px solid ${s.dex === curDex ? '#ffb34766' : '#241d10'}`, borderRadius: 12, padding: 8, textAlign: 'center', flexShrink: 0,
+            }}>
+              <SpriteSlot dex={s.dex} name={s.name} size={72} accent={s.dex === curDex ? '#ffb347' : '#5a5240'} />
+              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 12, fontWeight: s.dex === curDex ? 700 : 500, color: s.dex === curDex ? '#fff' : '#b3a892', marginTop: 4 }}>{s.name}</div>
+            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 6px', minWidth: 64 }}>
+              <span style={{ color: '#ffb347', fontSize: 18, lineHeight: 1 }}>→</span>
+              <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, color: '#9a8d6f', textAlign: 'center', marginTop: 2 }}>{(byD[hubDex].method || '').replace(/^at /, '')}</span>
+            </div>
+          </React.Fragment>
+        ))}
+        {wheel}
       </div>
     );
   }
@@ -307,8 +491,10 @@ window.VIEWS = window.VIEWS || {};
     const type = info ? info.type : null;
     const cls = info ? info.cls : 'Status';
     const pow = (info && typeof info.pow === 'number' && info.pow > 0) ? info.pow : null;
+    const acc = (info && typeof info.acc === 'number' && info.acc > 0) ? info.acc : null;
+    const pp = (info && typeof info.pp === 'number' && info.pp > 0) ? info.pp : null;
     const [hov, setHov] = React.useState(false);
-    const cols = (showLevel ? '46px ' : '') + '38px 1fr 44px 76px';
+    const cols = (showLevel ? '46px ' : '') + '1fr 44px 48px 40px 76px 38px';
     return (
       <button onClick={() => go('#/moves/' + encodeURIComponent(info ? info.name : mv))}
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
@@ -318,23 +504,27 @@ window.VIEWS = window.VIEWS || {};
           border: `1px solid ${hov ? '#5a4318' : '#241d10'}`,
         }}>
         {showLevel && <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347', textAlign: 'right' }}>{lvl === 0 || lvl === 1 ? '—' : 'Lv' + lvl}</span>}
-        <span style={{ display: 'flex', justifyContent: 'center' }}><CatBadge cls={cls} /></span>
         <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13.5, color: hov ? '#fff' : '#e6dcc6', textTransform: 'capitalize', minWidth: 0, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
         <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#9a8d6f', textAlign: 'center' }}>{pow !== null ? pow : '–'}</span>
+        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#9a8d6f', textAlign: 'center' }}>{acc !== null ? acc : '–'}</span>
+        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#9a8d6f', textAlign: 'center' }}>{pp !== null ? pp : '–'}</span>
         <span style={{ display: 'flex', justifyContent: 'center' }}>{type && <TypePill t={type} sm onClick={() => {}} />}</span>
+        <span style={{ display: 'flex', justifyContent: 'center' }}><CatBadge cls={cls} /></span>
       </button>
     );
   }
   function MoveHeader({ showLevel }) {
-    const cols = (showLevel ? '46px ' : '') + '38px 1fr 44px 76px';
+    const cols = (showLevel ? '46px ' : '') + '1fr 44px 48px 40px 76px 38px';
     const cell = { fontFamily: "'Space Mono', monospace", fontSize: 9, letterSpacing: 1, color: '#6f6450', textTransform: 'uppercase' };
     return (
       <div style={{ display: 'grid', gridTemplateColumns: cols, alignItems: 'center', columnGap: 10, padding: '0 12px 2px', width: '100%', boxSizing: 'border-box', border: '1px solid transparent', borderBottom: 'none' }}>
         {showLevel && <span style={{ ...cell, textAlign: 'right' }}>Lv</span>}
-        <span style={{ ...cell, textAlign: 'center' }}>Cat</span>
         <span style={cell}>Move</span>
         <span style={{ ...cell, textAlign: 'center' }}>Pwr</span>
+        <span style={{ ...cell, textAlign: 'center' }}>Acc</span>
+        <span style={{ ...cell, textAlign: 'center' }}>PP</span>
         <span style={{ ...cell, textAlign: 'center' }}>Type</span>
+        <span style={{ ...cell, textAlign: 'center' }}>Cat</span>
       </div>
     );
   }
@@ -415,7 +605,6 @@ window.VIEWS = window.VIEWS || {};
             <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: 2, color: '#7a6c4a' }}>No.{d.dex}</div>
             <SpriteSlot dex={d.dex} name={cur.name} size={240} accent={accent} suffix={vi > 0 ? String(vi) : undefined} label="HERO SPRITE" />
             <div style={{ fontFamily: "'Cinzel', Georgia, 'Times New Roman', serif", fontWeight: 800, fontSize: 38, color: '#fff', textAlign: 'center', lineHeight: 1, textShadow: `0 0 24px ${accent}44` }}>{cur.name}</div>
-            {d.evoNote && vi === 0 && <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, color: '#9a8d6f', textAlign: 'center', maxWidth: 260 }}>Evolves {d.evoNote}</div>}
           </div>
 
           {/* right: forms + stats + showcase */}

@@ -14,7 +14,7 @@ window.VIEWS = window.VIEWS || {};
       <div style={{ display: 'grid', gridTemplateColumns: '50px 1.4fr 0.9fr 0.7fr 46px 46px 38px 1.3fr', gap: 12, alignItems: 'center', padding: '11px 16px', background: '#0c0a05', border: '1px solid #241d10', borderRadius: 10, marginBottom: 7 }} className="se-tm-row">
         <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347', fontWeight: 700 }}>TM{String(t.tm).padStart(2, '0')}</span>
         <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 15, color: '#fff' }}>{t.move}</span>
-        <span>{ty ? <TypePill t={t.type} sm onClick={() => {}} /> : <span style={{ fontSize: 11, color: '#6a5d42' }}>{t.type}</span>}</span>
+        <span>{ty ? <TypePill t={t.type} sm onClick={() => {}} /> : <span style={{ fontSize: 11, color: '#6a5d42' }}>{t.type === 'QMARKS' ? '???' : t.type}</span>}</span>
         <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, fontWeight: 600, color: cls }}>{t.cls}</span>
         <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: '#fff6e8', textAlign: 'right' }}>{t.pow || '—'}</span>
         <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: '#cbbd9f', textAlign: 'right' }}>{t.acc || '—'}</span>

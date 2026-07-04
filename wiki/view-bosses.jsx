@@ -38,15 +38,19 @@ window.VIEWS = window.VIEWS || {};
     // Sprite key: regional dex if present, else national-sprite fallback by species name.
     const fallback = window.VSE_SPECIES_SPRITE && window.VSE_SPECIES_SPRITE[m.sp.toUpperCase()];
     const spriteKey = m.dex || fallback;
+    // Form label + optional form-sprite suffix (only used if the sprite file exists).
+    const FORM_SUFFIX = { 'Alolan': 'alola', 'Galarian': 'galar', 'Hisuian': 'hisui', 'Wash': 'wash', 'Dusk Mane': 'dusk' };
+    const formSuffix = m.form ? FORM_SUFFIX[m.form] : undefined;
+    const baseName = m.nick || (entry ? entry.name : m.sp.toLowerCase());
     return (
       <div style={{ background: '#0d0a04', border: `1px solid ${accent}33`, borderRadius: 12, padding: 12, boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
           <button onClick={() => m.dex && go('#/pokemon/' + m.dex)} style={{ cursor: m.dex ? 'pointer' : 'default', background: 'none', border: 'none', padding: 0, flexShrink: 0 }}>
-            <SpriteSlot dex={spriteKey} name={m.sp} size={64} accent={accent} />
+            <SpriteSlot dex={spriteKey} name={m.sp} size={64} accent={accent} suffix={formSuffix} />
           </button>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 6 }}>
-              <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 15, color: '#fff', textTransform: 'capitalize' }}>{m.nick || (entry ? entry.name : m.sp.toLowerCase())}</span>
+              <span style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 15, color: '#fff', textTransform: 'capitalize' }}>{m.form ? m.form + ' ' + baseName : baseName}</span>
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: '#ffb347' }}>Lv {m.lv}</span>
             </div>
             {m.nick && <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, color: '#7a6c4a', textTransform: 'capitalize', marginTop: 1 }}>{entry ? entry.name : m.sp.toLowerCase()}</div>}

@@ -6,7 +6,8 @@
 
   // ---- Type pill ---------------------------------------------------------
   function TypePill({ t, sm, glow, onClick }) {
-    const c = TYPES[t] || { name: t, bg: '#333', glow: '#888', fg: '#fff' };
+    const LABEL = { QMARKS: '???' };
+    const c = TYPES[t] || { name: LABEL[t] || t, bg: '#333', glow: '#888', fg: '#fff' };
     const stop = (e) => { e.stopPropagation(); go('#/types'); };
     return (
       <span onClick={onClick === undefined ? stop : onClick}
@@ -24,13 +25,16 @@
   }
 
   // ---- Sprite slot (auto-loads sprites/<dex>.png if present) -------------
-  function SpriteSlot({ dex, name, size = 120, label, accent = '#ffb347', suffix, imgFilter }) {
+  function spriteUrl(dex, suffix) {
     const fileKey = String(dex) + (suffix ? '-' + suffix : '');
     const known = window.SPRITE_FILES ? window.SPRITE_FILES.has(fileKey)
                 : (window.SPRITE_SET ? window.SPRITE_SET.has(String(dex)) : true);
-    const hasSrc = dex && known;
+    if (!dex || !known) return null;
     const cacheKey = window.SPRITE_VERSION ? `?v=${window.SPRITE_VERSION}` : '';
-    const src = hasSrc ? `sprites/${fileKey}.png${cacheKey}` : null;
+    return `sprites/${fileKey}.png${cacheKey}`;
+  }
+  function SpriteSlot({ dex, name, size = 120, label, accent = '#ffb347', suffix, imgFilter }) {
+    const src = spriteUrl(dex, suffix);
     const [ok, setOk] = React.useState(false);
     React.useEffect(() => { setOk(false); }, [src]);
     return (
@@ -132,14 +136,30 @@
   function MovePill({ name }) {
     const [hov, setHov] = React.useState(false);
     const label = String(name).toLowerCase().replace(/_/g, ' ');
+    const norm = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const info = (window.VSE_MOVES || []).find(mv => norm(mv.name) === norm(name));
+    const type = info && info.type;
+    const tc = (type && TYPES[type]) ? TYPES[type] : null;
+    const CAT = { Physical: '#c0392b', Special: '#3b6fb5', Status: '#6b6b6b' };
+    const catColor = info ? (CAT[info.cls] || CAT.Status) : null;
+    const catAbbr = info ? (info.cls === 'Physical' ? 'PHY' : info.cls === 'Special' ? 'SPC' : 'STA') : null;
+    const baseBg = tc ? (hov ? tc.glow + '2e' : tc.glow + '1c') : (hov ? '#2a2110' : '#1a1407');
+    const baseBorder = tc ? (hov ? tc.glow + 'aa' : tc.glow + '55') : (hov ? '#5a4318' : '#2c2413');
     return (
       <button onClick={(e) => { e.stopPropagation(); go('#/moves/' + encodeURIComponent(name)); }}
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
         style={{
           cursor: 'pointer', fontFamily: "'Outfit', sans-serif", fontSize: 11, textTransform: 'capitalize',
-          color: hov ? '#fff' : '#d8cbb0', background: hov ? '#2a2110' : '#1a1407',
-          border: `1px solid ${hov ? '#5a4318' : '#2c2413'}`, borderRadius: 6, padding: '2px 8px',
-        }}>{label}</button>
+          color: hov ? '#fff' : '#e6dcc6', background: baseBg,
+          border: `1px solid ${baseBorder}`, borderRadius: 6, padding: '2px 6px 2px 8px',
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+        }}>
+        <span>{label}</span>
+        {catColor && <span title={info.cls} style={{
+          fontFamily: "'Space Mono', monospace", fontSize: 8, fontWeight: 700, letterSpacing: 0.5, color: '#fff',
+          background: catColor, borderRadius: 3, padding: '1px 4px', flexShrink: 0,
+        }}>{catAbbr}</span>}
+      </button>
     );
   }
   function AbilityPill({ name, hidden }) {
@@ -171,5 +191,5 @@
     );
   }
 
-  window.VUI = { go, TypePill, MovePill, AbilityPill, ItemPill, SpriteSlot, StatBars, Panel, PageHead, Empty, TYPES };
+  window.VUI = { go, TypePill, MovePill, AbilityPill, ItemPill, SpriteSlot, spriteUrl, StatBars, Panel, PageHead, Empty, TYPES };
 })();

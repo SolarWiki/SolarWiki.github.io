@@ -44,9 +44,10 @@ window.VIEWS = window.VIEWS || {};
   }
 
   // ---- Page --------------------------------------------------------------
-  window.VIEWS.Pokedex = function Pokedex({ query }) {
+  window.VIEWS.Pokedex = function Pokedex() {
     const [filters, setFilters] = React.useState([]);
     const [sort, setSort] = React.useState('dex');
+    const [query, setQuery] = React.useState('');
     const q = (query || '').trim().toLowerCase();
     const toggle = (t) => setFilters(f => f.includes(t) ? f.filter(x => x !== t) : [...f, t]);
 
@@ -71,6 +72,13 @@ window.VIEWS = window.VIEWS || {};
       <div>
         <PageHead kicker="REGIONAL SOLDEX" title="Pokédex"
           sub="Every species catalogued for Pokémon Solar Eclipse. Filter by type, search by name, and open any entry for its stats, abilities, and alternate forms." />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 14px', borderRadius: 10, background: '#0f0b04', border: '1px solid #2a2110', marginBottom: 16, maxWidth: 360 }}>
+          <span style={{ color: '#7a6c4a', fontSize: 15 }}>⌕</span>
+          <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search by name or number…"
+            style={{ border: 'none', outline: 'none', background: 'transparent', color: '#ece3d2', fontFamily: "'Outfit', sans-serif", fontSize: 14, width: '100%' }} />
+          {query && <button onClick={() => setQuery('')} style={{ cursor: 'pointer', background: 'transparent', border: 'none', color: '#7a6c4a', fontSize: 15 }}>×</button>}
+        </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 16, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>

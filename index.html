@@ -90,7 +90,6 @@
   }
 
   function App() {
-    const [query, setQuery] = React.useState('');
     const [hash, setHash] = React.useState(window.location.hash || '#/pokedex');
     React.useEffect(() => {
       const f = () => { setHash(window.location.hash || '#/pokedex'); window.scrollTo(0, 0); };
@@ -99,7 +98,6 @@
       return () => window.removeEventListener('hashchange', f);
     }, []);
     const { view, param } = parseHash(hash);
-    const onPokedex = view === 'pokedex';
 
     let content;
     if (view === 'pokemon') content = <window.VIEWS.Detail param={param} />;
@@ -114,7 +112,7 @@
     else if (view === 'nuzlocke') content = <window.VIEWS.Nuzlocke />;
     else if (view === 'locations') content = <window.VIEWS.Locations />;
     else if (view === 'faq') content = <window.VIEWS.FAQ param={param} />;
-    else content = <window.VIEWS.Pokedex query={query} />;
+    else content = <window.VIEWS.Pokedex />;
 
     const NAV = [['pokedex', 'Pokédex'], ['bosses', 'Bosses'], ['types', 'Type Calc'], ['abilities', 'Abilities'], ['moves', 'Moves'], ['items', 'Items'], ['tms', 'TMs'], ['team', 'Team Builder'], ['damage', 'Damage Calc'], ['nuzlocke', 'Nuzlocke'], ['locations', 'Locations'], ['faq', 'FAQ']];
 
@@ -128,14 +126,6 @@
               SOLAR<span style={{ color: '#ffb347' }}>ECLIPSE</span>
             </span>
           </div>
-          {onPokedex && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 14px', borderRadius: 10, background: '#0f0b04', border: '1px solid #2a2110', minWidth: 240, flex: '0 1 320px' }}>
-              <span style={{ color: '#7a6c4a', fontSize: 15 }}>⌕</span>
-              <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search the dex…"
-                style={{ border: 'none', outline: 'none', background: 'transparent', color: '#ece3d2', fontFamily: "'Outfit', sans-serif", fontSize: 14, width: '100%' }} />
-              {query && <button onClick={() => setQuery('')} style={{ cursor: 'pointer', background: 'transparent', border: 'none', color: '#7a6c4a', fontSize: 15 }}>×</button>}
-            </div>
-          )}
         </header>
 
         {/* nav */}
